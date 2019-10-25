@@ -7,6 +7,8 @@ import (
 	"github.com/wizhodl/go-utils/log"
 )
 
+// TODO: able to register any holder type
+
 type scanFunc func(rows *sql.Rows, holder interface{}) error
 
 // slice must be like &[]*struct{} or &[]struct{}

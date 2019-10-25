@@ -2,7 +2,6 @@ package orm
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 )
 
@@ -14,34 +13,28 @@ const (
 )
 
 type sqlHead struct {
-	option    int
-	columns   []string
-	receivers []reflect.Type
+	option int
+	fields []string
 }
 
 func (h *sqlHead) String() string {
 	switch h.option {
 	case optionSelect:
-		var columns = "*"
-		if h.columns != nil {
-			columns = strings.Join(h.columns, ",")
+		var fields = "*"
+		if h.fields != nil {
+			fields = strings.Join(h.fields, ",")
 		}
-		return fmt.Sprintf("SELECT %s FROM", columns)
+		return fmt.Sprintf("SELECT %s FROM", fields)
+
 	case optionInsert:
 		return "INSERT INTO"
+
 	case optionUpdate:
 		return "UPDATE"
+
 	default:
 		return ""
 	}
-}
-
-func (h *sqlHead) newReceivers() []interface{} {
-	var receivers []interface{}
-	for _, typ := range h.receivers {
-		receivers = append(receivers, reflect.New(typ).Interface())
-	}
-	return receivers
 }
 
 type sqlOrder struct {

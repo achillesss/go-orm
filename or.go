@@ -38,6 +38,10 @@ func (s *joinSquel) orTable(src reflect.Value) *joinSquel {
 }
 
 func (db *DB) or(where interface{}, args ...interface{}) *DB {
+	if db.sentence.where == nil {
+		db.sentence.where = new(joinSquel)
+	}
+
 	var val = reflect.Indirect(reflect.ValueOf(where))
 	switch w := val.Kind(); w {
 	case reflect.String:
@@ -49,10 +53,7 @@ func (db *DB) or(where interface{}, args ...interface{}) *DB {
 		}
 	case reflect.Struct:
 		db.sentence.where.orTable(val)
+		db.mod = where
 	}
 	return db
-}
-
-func (db *DB) Or(where interface{}, args ...interface{}) *DB {
-	return db.or(where, args...)
 }

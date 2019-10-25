@@ -1,0 +1,3 @@
+package orm
+
+// batch insert

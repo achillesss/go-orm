@@ -6,9 +6,7 @@ func (h *sqlHead) select_(columns ...string) {
 		return
 	}
 
-	for _, column := range columns {
-		h.columns = append(h.columns, column)
-	}
+	h.fields = columns
 }
 
 func (q *sqlSentence) select_(columns ...string) *sqlSentence {
@@ -20,11 +18,4 @@ func (q *sqlSentence) select_(columns ...string) *sqlSentence {
 func (db *DB) select_(columns ...string) *DB {
 	db.sentence.select_(columns...)
 	return db
-}
-
-// Select *: none input
-// Select table: struct{}, &struct{}
-// Select columns: []string
-func (db *DB) Select(columns ...string) *DB {
-	return db.select_(columns...)
 }

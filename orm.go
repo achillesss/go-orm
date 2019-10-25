@@ -27,3 +27,30 @@ func (db *DB) copy() *DB {
 	}
 	return &d
 }
+
+func (db *DB) Table(t interface{}) *DB {
+	db.mod = t
+	return db
+}
+
+// Select *: none input
+// Select columns: []string
+func (db *DB) Select(columns ...string) *DB {
+	return db.select_(columns...)
+}
+
+func (db *DB) Where(where interface{}, args ...interface{}) *DB {
+	return db.and(where, args...)
+}
+
+func (db *DB) And(where interface{}, args ...interface{}) *DB {
+	return db.and(where, args...)
+}
+
+func (db *DB) Or(where interface{}, args ...interface{}) *DB {
+	return db.or(where, args...)
+}
+
+func (db *DB) End(any ...interface{}) *DB {
+	return db.end(any...)
+}

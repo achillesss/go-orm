@@ -178,8 +178,3 @@ func (q *sqlSentence) valueTable(table reflect.Value) *sqlSentence {
 	q.tableName = tName
 	return q
 }
-
-func (db *DB) Table(t interface{}) *DB {
-	db.mod = t
-	return db
-}

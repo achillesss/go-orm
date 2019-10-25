@@ -17,9 +17,6 @@ func (db *DB) end(any ...interface{}) *DB {
 	case optionSelect:
 		db.scan(any[0])
 	}
-	return db
-}
 
-func (db *DB) End(any ...interface{}) *DB {
-	return db.end(any...)
+	return db
 }
