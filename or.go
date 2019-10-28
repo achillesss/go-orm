@@ -37,23 +37,28 @@ func (s *joinSquel) orTable(src reflect.Value) *joinSquel {
 	return s
 }
 
-func (db *DB) or(where interface{}, args ...interface{}) *DB {
-	if db.sentence.where == nil {
-		db.sentence.where = new(joinSquel)
+func (s *sqlSentence) or(where interface{}, args ...interface{}) {
+	if s.where == nil {
+		s.where = new(joinSquel)
 	}
 
 	var val = reflect.Indirect(reflect.ValueOf(where))
-	switch w := val.Kind(); w {
+	switch val.Kind() {
 	case reflect.String:
-		db.sentence.where.addOrRaw(fmt.Sprintf(val.String(), args...))
+		s.where.addOrRaw(fmt.Sprintf(val.String(), args...))
 	case reflect.Map:
 		m, ok := val.Interface().(map[string]interface{})
 		if ok {
-			db.sentence.where.orMap(m)
+			s.where.orMap(m)
 		}
 	case reflect.Struct:
-		db.sentence.where.orTable(val)
-		db.mod = where
+		s.where.orTable(val)
+		s.mod = where
 	}
-	return db
+}
+
+func (db *DB) or(where interface{}, args ...interface{}) *DB {
+	var d = db.copy()
+	d.sentence.or(where, args...)
+	return d
 }

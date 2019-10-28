@@ -10,4 +10,5 @@ const (
 	errInvalidTable                 ormErr = "InvalidTable"
 	errInvalidScanHolder            ormErr = "InvalidScanHolder"
 	errScanHolderMustBeValidPointer ormErr = "ScanHolderMustBeValidPointer"
+	errSelectQueryNeedDataHolder    ormErr = "SelectQueryNeedDataHolder"
 )

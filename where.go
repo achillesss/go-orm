@@ -46,7 +46,7 @@ func (j *joinSquel) String() string {
 func joinColumnValue(column string, value interface{}) string {
 	return strings.Join([]string{
 		convertToSqlColumn(column),
-		fmt.Sprintf("%v", convertToSqlValue(value)),
+		fmt.Sprintf("%v", value),
 	}, "=")
 }
 

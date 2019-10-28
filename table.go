@@ -113,7 +113,7 @@ func readTable(val reflect.Value, readDefaultValue bool) (columns []string, valu
 	for i := 0; i < val.NumField(); i++ {
 		valueField := val.Field(i)
 		typeField := val.Type().Field(i)
-		var columeName, isColumn, isStruct = getColumnName(valueField, typeField)
+		var columnName, isColumn, isStruct = getColumnName(valueField, typeField)
 
 		if isStruct {
 			cs, vs := readTable(valueField, readDefaultValue)
@@ -133,8 +133,8 @@ func readTable(val reflect.Value, readDefaultValue bool) (columns []string, valu
 			}
 		}
 
-		columns = append(columns, columeName)
-		values = append(values, valueField.Interface())
+		columns = append(columns, columnName)
+		values = append(values, convertValueToSqlValue(columnName, valueField))
 	}
 
 	return
@@ -177,4 +177,10 @@ func (q *sqlSentence) valueTable(table reflect.Value) *sqlSentence {
 
 	q.tableName = tName
 	return q
+}
+
+func (db *DB) table(t interface{}) *DB {
+	var d = db.copy()
+	d.sentence.mod = t
+	return d
 }

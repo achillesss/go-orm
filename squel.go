@@ -69,19 +69,31 @@ func (s *sqlGroup) String() string {
 }
 
 type sqlSentence struct {
+	// table
+	mod interface{}
+
 	head      sqlHead
 	tableName string
-	where     *joinSquel
-	groupBy   *sqlGroup
-	orderBy   sqlOrders
-	offset    int
-	limit     int
+
+	// insert
+	values *sqlValues
+	value  *sqlValue
+	rawSet string
+
+	where   *joinSquel
+	groupBy *sqlGroup
+	orderBy sqlOrders
+	offset  int
+	limit   int
 }
 
-func (q *sqlSentence) copy() *sqlSentence {
+func (s *sqlSentence) copy() *sqlSentence {
+	var sen = *s
+	return &sen
+}
+
+func newSentence() *sqlSentence {
 	var s sqlSentence
-	s.head = q.head
-	s.tableName = q.tableName
 	return &s
 }
 
@@ -96,27 +108,40 @@ func offsetSquel(offset int) string {
 func (q *sqlSentence) String() string {
 	var sentenceSlice []string
 	sentenceSlice = append(sentenceSlice, q.head.String())
-	sentenceSlice = append(sentenceSlice, q.tableName)
+	sentenceSlice = append(sentenceSlice, convertToSqlColumn(q.tableName))
 
-	if q.where != nil {
-		sentenceSlice = append(sentenceSlice, "WHERE", q.where.String())
+	switch q.head.option {
+	case optionInsert:
+		if q.values != nil {
+			sentenceSlice = append(sentenceSlice, q.values.String())
+		}
+
+		if q.value != nil {
+			sentenceSlice = append(sentenceSlice, q.value.String())
+		}
+
+	case optionSelect:
+		if q.where != nil {
+			sentenceSlice = append(sentenceSlice, "WHERE", q.where.String())
+		}
+		if q.groupBy != nil {
+			sentenceSlice = append(sentenceSlice, q.groupBy.String())
+		}
+
+		if q.orderBy != nil {
+			sentenceSlice = append(sentenceSlice, q.orderBy.String())
+		}
+
+		if q.limit != 0 {
+			sentenceSlice = append(sentenceSlice, limitSquel(q.limit))
+		}
+
+		if q.offset != 0 {
+			sentenceSlice = append(sentenceSlice, offsetSquel(q.offset))
+		}
 	}
 
-	if q.groupBy != nil {
-		sentenceSlice = append(sentenceSlice, q.groupBy.String())
-	}
-
-	if q.orderBy != nil {
-		sentenceSlice = append(sentenceSlice, q.orderBy.String())
-	}
-
-	if q.limit != 0 {
-		sentenceSlice = append(sentenceSlice, limitSquel(q.limit))
-	}
-
-	if q.offset != 0 {
-		sentenceSlice = append(sentenceSlice, offsetSquel(q.offset))
-	}
-
-	return strings.Join(sentenceSlice, " ") + ";"
+	var query = strings.Join(sentenceSlice, " ") + ";"
+	debugLog(query)
+	return query
 }

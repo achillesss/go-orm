@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/wizhodl/go-utils/log"
 )
 
 var space = ""
@@ -67,15 +69,23 @@ func dateStr(t time.Time) string {
 	return fmt.Sprintf("%q", t.Format(dateFormat))
 }
 
-func convertValueToSqlValue(val reflect.Value) interface{} {
-	var typ = val.Type()
+func defaultSQLValue(column string) string {
+	return fmt.Sprintf("DEFAULT(%s)", convertToSqlColumn(column))
+}
+
+func convertValueToSqlValue(column string, val reflect.Value) interface{} {
 	// is pointer
-	if typ.Kind() == reflect.Ptr {
+	if val.Kind() == reflect.Ptr {
 		if val.IsNil() {
 			return NULL
 		}
 		val = val.Elem()
-		typ = val.Type()
+	}
+	var typ = val.Type()
+
+	var zeroValue = reflect.Zero(typ)
+	if reflect.DeepEqual(zeroValue.Interface(), val.Interface()) {
+		return defaultSQLValue(column)
 	}
 
 	if typ.Kind() == reflect.String {
@@ -89,9 +99,9 @@ func convertValueToSqlValue(val reflect.Value) interface{} {
 	return val.Interface()
 }
 
-func convertToSqlValue(src interface{}) interface{} {
+func convertToSqlValue(column string, src interface{}) interface{} {
 	var val = reflect.ValueOf(src)
-	return convertValueToSqlValue(val)
+	return convertValueToSqlValue(column, val)
 }
 
 func convertToSqlColumns(columns []string) []string {
@@ -126,4 +136,10 @@ func initMap(src interface{}) bool {
 		elm.Set(reflect.MakeMap(elm.Type()))
 	}
 	return true
+}
+
+func debugLog(format string, args ...interface{}) {
+	if dbConfig.debugOn {
+		log.Infofln(format, args...)
+	}
 }

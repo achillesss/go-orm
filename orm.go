@@ -8,8 +8,6 @@ var dbConfig connConfig
 
 type DB struct {
 	*sql.DB
-	// mod is a table
-	mod interface{}
 	// sentence gen sql sentence
 	sentence *sqlSentence
 	// err returns any err
@@ -19,18 +17,18 @@ type DB struct {
 func (db *DB) copy() *DB {
 	var d DB
 	d.DB = db.DB
-	d.err = db.err
-	d.mod = db.mod
-	d.sentence = new(sqlSentence)
-	if db.sentence != nil {
-		*d.sentence = *db.sentence
+
+	if db.sentence == nil {
+		d.sentence = newSentence()
+	} else {
+		d.sentence = db.sentence.copy()
 	}
+
 	return &d
 }
 
 func (db *DB) Table(t interface{}) *DB {
-	db.mod = t
-	return db
+	return db.table(t)
 }
 
 // Select *: none input
@@ -51,6 +49,13 @@ func (db *DB) Or(where interface{}, args ...interface{}) *DB {
 	return db.or(where, args...)
 }
 
-func (db *DB) End(any ...interface{}) *DB {
-	return db.end(any...)
+// Insert(&struct{})
+// Insert([]*struct{})
+// Insert(format string, args ...interface{})
+func (db *DB) Insert(set interface{}, args ...interface{}) *DB {
+	return db.insert(set, args...)
+}
+
+func (db *DB) Do(any ...interface{}) error {
+	return db.do(any...).err
 }

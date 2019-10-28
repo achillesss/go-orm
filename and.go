@@ -33,22 +33,29 @@ func (s *joinSquel) andTable(src reflect.Value) *joinSquel {
 	return s
 }
 
-func (db *DB) and(where interface{}, args ...interface{}) *DB {
-	if db.sentence.where == nil {
-		db.sentence.where = new(joinSquel)
+func (s *sqlSentence) and(where interface{}, args ...interface{}) {
+	if s.where == nil {
+		s.where = new(joinSquel)
 	}
 	var val = reflect.Indirect(reflect.ValueOf(where))
 	switch val.Kind() {
 	case reflect.String:
-		db.sentence.where.addAndRaw(fmt.Sprintf(val.String(), args...))
+		s.where.addAndRaw(fmt.Sprintf(val.String(), args...))
+
 	case reflect.Map:
 		m, ok := val.Interface().(map[string]interface{})
 		if ok {
-			db.sentence.where.andMap(m)
+			s.where.andMap(m)
 		}
+
 	case reflect.Struct:
-		db.sentence.where.andTable(val)
-		db.mod = where
+		s.where.andTable(val)
+		s.mod = where
 	}
-	return db
+}
+
+func (db *DB) and(where interface{}, args ...interface{}) *DB {
+	var d = db.copy()
+	d.sentence.and(where, args...)
+	return d
 }
