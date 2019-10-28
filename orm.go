@@ -1,20 +1,21 @@
 package orm
 
-import (
-	"database/sql"
-)
-
 type DB struct {
-	*sql.DB
+	SqlDB
+	SqlTxDB
+
 	// sentence gen sql sentence
 	sentence *sqlSentence
 	// err returns any err
-	err error
+	err    error
+	isTxOn bool
 }
 
 func (db *DB) copy() *DB {
 	var d DB
-	d.DB = db.DB
+	d.SqlDB = db.SqlDB
+	d.SqlTxDB = db.SqlTxDB
+	d.isTxOn = db.isTxOn
 
 	if db.sentence == nil {
 		d.sentence = newSentence()
@@ -64,4 +65,31 @@ func (db *DB) Update(set interface{}, args ...interface{}) *DB {
 
 func (db *DB) Do(any ...interface{}) error {
 	return db.do(any...).err
+}
+
+// begin transaction
+func (db *DB) Begin() *DB {
+	return db.begin()
+}
+
+func (db *DB) Commit() error {
+	if db.isTxOn {
+		db.isTxOn = false
+		return db.SqlTxDB.Commit()
+	}
+	return nil
+}
+
+func (db *DB) Rollback() error {
+	if db.isTxOn {
+		db.isTxOn = false
+		return db.SqlTxDB.Rollback()
+	}
+	return nil
+}
+
+// end transaction
+func (db *DB) End(ok bool) error {
+	defer func() { db.isTxOn = false }()
+	return End(db.SqlTxDB, ok)
 }

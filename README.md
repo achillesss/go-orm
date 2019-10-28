@@ -122,8 +122,30 @@ if err!=nil {
 }
 ```
 
+## Transaction
+
+### Begin A Transaction
+```golang
+var tx = db.Begin()
+
+// then use tx like using db
+tx.Insert().Do()
+tx.Update().Do()
+tx.Select().Do()
+```
+
+### End A Transaction
+```golang
+// commit && rollback
+tx.Commit()
+tx.Rollback()
+
+// transaction end
+// if tx.err == nil, tx.Commmit(); else tx.Rollback()
+tx.End(tx.err == nil)
+```
+
 ## TODO:
-- Transactions
 - Complete select conditions
 - create tables, drop tables, auto migrate tables, create db
 

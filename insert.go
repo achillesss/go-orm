@@ -138,6 +138,10 @@ func (db *DB) insert(set interface{}, args ...interface{}) *DB {
 
 func (db *DB) doInsert() *DB {
 	var query = db.sentence.String()
-	_, db.err = db.Exec(query)
+	if db.isTxOn {
+		_, db.err = db.SqlTxDB.Exec(query)
+	} else {
+		_, db.err = db.SqlDB.Exec(query)
+	}
 	return db
 }

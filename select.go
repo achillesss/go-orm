@@ -123,9 +123,14 @@ func (db *DB) doSelect(any interface{}) *DB {
 	}
 
 	var query = db.sentence.String()
-	rows, err := db.DB.Query(query)
-	db.err = err
-	if err != nil {
+	var rows *sql.Rows
+	if db.isTxOn {
+		rows, db.err = db.SqlTxDB.Query(query)
+	} else {
+		rows, db.err = db.SqlDB.Query(query)
+	}
+
+	if db.err != nil {
 		return db
 	}
 
