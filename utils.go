@@ -73,7 +73,7 @@ func defaultSQLValue(column string) string {
 	return fmt.Sprintf("DEFAULT(%s)", convertToSqlColumn(column))
 }
 
-func convertValueToSqlValue(column string, val reflect.Value) interface{} {
+func convertValueToSqlValue(column string, val reflect.Value, keepOriginValue bool) interface{} {
 	// is pointer
 	if val.Kind() == reflect.Ptr {
 		if val.IsNil() {
@@ -83,9 +83,11 @@ func convertValueToSqlValue(column string, val reflect.Value) interface{} {
 	}
 	var typ = val.Type()
 
-	var zeroValue = reflect.Zero(typ)
-	if reflect.DeepEqual(zeroValue.Interface(), val.Interface()) {
-		return defaultSQLValue(column)
+	if !keepOriginValue {
+		var zeroValue = reflect.Zero(typ)
+		if reflect.DeepEqual(zeroValue.Interface(), val.Interface()) {
+			return defaultSQLValue(column)
+		}
 	}
 
 	if typ.Kind() == reflect.String {
@@ -99,9 +101,9 @@ func convertValueToSqlValue(column string, val reflect.Value) interface{} {
 	return val.Interface()
 }
 
-func convertToSqlValue(column string, src interface{}) interface{} {
+func convertToSqlValue(column string, src interface{}, keepOriginValue ...bool) interface{} {
 	var val = reflect.ValueOf(src)
-	return convertValueToSqlValue(column, val)
+	return convertValueToSqlValue(column, val, len(keepOriginValue) > 0 && keepOriginValue[0])
 }
 
 func convertToSqlColumns(columns []string) []string {

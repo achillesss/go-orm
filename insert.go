@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-
-	"github.com/wizhodl/go-utils/log"
 )
 
 type sqlValue struct {
@@ -13,7 +11,7 @@ type sqlValue struct {
 	values  []interface{}
 }
 
-func (v sqlValue) String() string {
+func (v sqlValue) InsertString() string {
 	if len(v.columns) != len(v.values) {
 		panic(fmt.Sprintf("columns %d with %d values", len(v.columns), len(v.values)))
 		return ""
@@ -30,6 +28,23 @@ func (v sqlValue) String() string {
 		bracket(strings.Join(columns, ",")),
 		bracket(strings.Join(values, ",")),
 	}, " VALUES ")
+}
+
+func (v sqlValue) UpdateString() string {
+	if len(v.columns) != len(v.values) {
+		panic(fmt.Sprintf("columns %d with %d values", len(v.columns), len(v.values)))
+		return ""
+	}
+
+	var pairs []string
+	for i := range v.columns {
+		pairs = append(pairs, strings.Join([]string{
+			convertToSqlColumn(v.columns[i]),
+			fmt.Sprintf("%v", v.values[i]),
+		}, "="))
+	}
+
+	return strings.Join(pairs, ",")
 }
 
 type sqlValues struct {
@@ -112,10 +127,7 @@ func (s *sqlSentence) insert(set interface{}, args ...interface{}) {
 		s.value = &value
 		value.insertSingle(set)
 
-	case reflect.String:
-		s.rawSet = fmt.Sprintf(val.String(), args...)
 	}
-
 }
 
 func (db *DB) insert(set interface{}, args ...interface{}) *DB {
@@ -127,6 +139,5 @@ func (db *DB) insert(set interface{}, args ...interface{}) *DB {
 func (db *DB) doInsert() *DB {
 	var query = db.sentence.String()
 	_, db.err = db.Exec(query)
-	log.Infofln("err: %v", db.err)
 	return db
 }

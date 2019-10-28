@@ -56,6 +56,14 @@ func (db *DB) Insert(set interface{}, args ...interface{}) *DB {
 	return db.insert(set, args...)
 }
 
+// Update(&struct{}, string, string...)
+// Update([]*struct{})
+// Update(map[string]interface{}, string, string ...)
+// Update(format string, args ...interface{})
+func (db *DB) Update(set interface{}, args ...interface{}) *DB {
+	return db.update(set, args...)
+}
+
 func (db *DB) Do(any ...interface{}) error {
 	return db.do(any...).err
 }

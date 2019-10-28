@@ -11,4 +11,5 @@ const (
 	errInvalidScanHolder            ormErr = "InvalidScanHolder"
 	errScanHolderMustBeValidPointer ormErr = "ScanHolderMustBeValidPointer"
 	errSelectQueryNeedDataHolder    ormErr = "SelectQueryNeedDataHolder"
+	errNotSupportType               ormErr = "NotSupportType"
 )

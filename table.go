@@ -134,7 +134,7 @@ func readTable(val reflect.Value, readDefaultValue bool) (columns []string, valu
 		}
 
 		columns = append(columns, columnName)
-		values = append(values, convertValueToSqlValue(columnName, valueField))
+		values = append(values, convertValueToSqlValue(columnName, valueField, false))
 	}
 
 	return

@@ -24,6 +24,9 @@ func (db *DB) do(any ...interface{}) *DB {
 
 	case optionInsert:
 		db.doInsert()
+
+	case optionUpdate:
+		db.doUpdate()
 	}
 
 	return db

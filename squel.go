@@ -78,7 +78,6 @@ type sqlSentence struct {
 	// insert
 	values *sqlValues
 	value  *sqlValue
-	rawSet string
 
 	where   *joinSquel
 	groupBy *sqlGroup
@@ -111,19 +110,31 @@ func (q *sqlSentence) String() string {
 	sentenceSlice = append(sentenceSlice, convertToSqlColumn(q.tableName))
 
 	switch q.head.option {
+	case optionUpdate:
+		sentenceSlice = append(sentenceSlice, "SET")
+
+		if q.value != nil {
+			sentenceSlice = append(sentenceSlice, q.value.UpdateString())
+		}
+
+		if q.where != nil {
+			sentenceSlice = append(sentenceSlice, "WHERE", q.where.String())
+		}
+
 	case optionInsert:
 		if q.values != nil {
 			sentenceSlice = append(sentenceSlice, q.values.String())
 		}
 
 		if q.value != nil {
-			sentenceSlice = append(sentenceSlice, q.value.String())
+			sentenceSlice = append(sentenceSlice, q.value.InsertString())
 		}
 
 	case optionSelect:
 		if q.where != nil {
 			sentenceSlice = append(sentenceSlice, "WHERE", q.where.String())
 		}
+
 		if q.groupBy != nil {
 			sentenceSlice = append(sentenceSlice, q.groupBy.String())
 		}
