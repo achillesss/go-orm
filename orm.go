@@ -4,8 +4,6 @@ import (
 	"database/sql"
 )
 
-var dbConfig connConfig
-
 type DB struct {
 	*sql.DB
 	// sentence gen sql sentence

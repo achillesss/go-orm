@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+var dbConfig connConfig
+
 type connConfig struct {
 	driverName         string
 	user               string
