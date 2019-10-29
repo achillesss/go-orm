@@ -63,6 +63,7 @@ func (db *DB) Update(set interface{}, args ...interface{}) *DB {
 	return db.update(set, args...)
 }
 
+// Do a sql query
 func (db *DB) Do(any ...interface{}) error {
 	return db.do(any...).err
 }
@@ -72,6 +73,7 @@ func (db *DB) Begin() *DB {
 	return db.begin()
 }
 
+// Commit is Commit
 func (db *DB) Commit() error {
 	if db.isTxOn {
 		db.isTxOn = false
@@ -80,6 +82,7 @@ func (db *DB) Commit() error {
 	return nil
 }
 
+// Rollback is Rollback
 func (db *DB) Rollback() error {
 	if db.isTxOn {
 		db.isTxOn = false
