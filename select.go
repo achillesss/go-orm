@@ -43,6 +43,8 @@ func scanRowsToTableSlice(rows *sql.Rows, holder interface{}) error {
 		return err
 	}
 
+	err = ErrNotFound
+
 	for rows.Next() {
 		var table = reflect.New(baseType)
 		var holder = table.Elem()
@@ -58,7 +60,7 @@ func scanRowsToTableSlice(rows *sql.Rows, holder interface{}) error {
 		}
 	}
 
-	return nil
+	return err
 }
 
 func scanRowsToTable(rows *sql.Rows, holder interface{}) error {
@@ -68,6 +70,8 @@ func scanRowsToTable(rows *sql.Rows, holder interface{}) error {
 		return err
 	}
 
+	err = ErrNotFound
+
 	for rows.Next() {
 		err = scanRowsToTableValue(rows, columns, val)
 		if err != nil {
@@ -75,7 +79,7 @@ func scanRowsToTable(rows *sql.Rows, holder interface{}) error {
 		}
 	}
 
-	return nil
+	return err
 }
 
 func scanRowsToTableValue(rows *sql.Rows, columns []string, table reflect.Value) error {
@@ -93,67 +97,21 @@ func scanRowsToMap(rows *sql.Rows, dst map[string]interface{}) error {
 		return err
 	}
 
+	err = ErrNotFound
+
 	for rows.Next() {
 		var scanValues []interface{}
 		for _, t := range types {
 			var holder = reflect.New(t.ScanType())
-			dst[t.Name()] = holder.Elem()
+			dst[t.Name()] = holder.Elem().Interface()
 			scanValues = append(scanValues, holder.Interface())
 		}
 
-		var err = rows.Scan(scanValues...)
+		err = rows.Scan(scanValues...)
 		if err != nil {
 			return err
 		}
 	}
 
-	return nil
-}
-
-func (db *DB) doSelect(any interface{}) *DB {
-	var val = reflect.ValueOf(any)
-	if val.Kind() != reflect.Ptr {
-		db.err = errScanHolderMustBeValidPointer
-		return db
-	}
-
-	if val.IsNil() {
-		db.err = errScanHolderMustBeValidPointer
-		return db
-	}
-
-	var query = db.sentence.String()
-	var rows *sql.Rows
-	if db.isTxOn {
-		rows, db.err = db.SqlTxDB.Query(query)
-	} else {
-		rows, db.err = db.SqlDB.Query(query)
-	}
-
-	if db.err != nil {
-		return db
-	}
-
-	defer rows.Close()
-
-	if val.Type().Kind() == reflect.Ptr {
-		switch val.Type().Elem().Kind() {
-		// scan to slice
-		case reflect.Slice:
-			scanRowsToTableSlice(rows, any)
-			// scan to table struct
-		case reflect.Struct:
-			scanRowsToTable(rows, any)
-			// scan to map
-		case reflect.Map:
-			initMap(any)
-			m, ok := (any).(*(map[string]interface{}))
-			if ok {
-				db.err = scanRowsToMap(rows, *m)
-			}
-		default:
-		}
-	}
-
-	return db
+	return err
 }

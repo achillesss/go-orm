@@ -1,32 +1,147 @@
 package orm
 
 import (
+	"database/sql"
 	"reflect"
+	"time"
+
+	"github.com/wizhodl/go-utils/log"
 )
 
 func (db *DB) do(any ...interface{}) *DB {
 	var val = reflect.Indirect(reflect.ValueOf(db.sentence.mod))
 	if val.Kind() != reflect.Struct {
-		db.err = errInvalidTable
+		db.err = ErrInvalidTable
 		return db
 	}
 
 	db.sentence.table(db.sentence.mod)
+	db.sentence.String()
+
+	var now = GetNowTime()
+	var cost time.Duration
+
+	if dbConfig.debugOn {
+		defer func() {
+			switch db.err {
+			case nil:
+				log.Infofln(db.sentence.raw)
+			case ErrNotFound:
+				log.Warningfln("%s%s;%v", db.sentence.raw, db.err, cost)
+			default:
+				log.Errorfln("%s%s;%v", db.sentence.raw, db.err, cost)
+			}
+		}()
+	}
 
 	switch db.sentence.head.option {
 	case optionSelect:
 		if any == nil {
-			db.err = errSelectQueryNeedDataHolder
+			db.err = ErrSelectQueryNeedDataHolder
 			return db
 		}
 
-		db.doSelect(any[0])
+		var holder = any[0]
 
-	case optionInsert:
-		db.doInsert()
+		var val = reflect.ValueOf(holder)
+		var typ = reflect.TypeOf(holder)
+		if val.Kind() != reflect.Ptr {
+			db.err = ErrScanHolderMustBeValidPointer
+			return db
+		}
 
-	case optionUpdate:
-		db.doUpdate()
+		var holderValue = val.Elem()
+		var holderType = typ.Elem()
+
+		if val.IsNil() {
+			db.err = ErrScanHolderMustBeValidPointer
+			return db
+		}
+
+		var rows *sql.Rows
+		if db.isTxOn {
+			rows, db.err = db.SqlTxDB.Query(db.sentence.raw)
+		} else {
+			rows, db.err = db.SqlDB.Query(db.sentence.raw)
+		}
+
+		cost = time.Since(now)
+
+		defer rows.Close()
+
+		if db.err != nil {
+			return db
+		}
+
+		var columns []string
+		columns, db.err = rows.Columns()
+		if db.err != nil {
+			return db
+		}
+
+		db.err = ErrNotFound
+
+		switch holderType.Kind() {
+		// scan to slice
+		case reflect.Slice:
+			if val.IsNil() {
+				db.err = ErrScanHolderMustBeValidPointer
+				return db
+			}
+
+			var baseType = holderType.Elem()
+			var isBasePtr bool
+			if isBasePtr = baseType.Kind() == reflect.Ptr; isBasePtr {
+				baseType = baseType.Elem()
+			}
+
+			for rows.Next() {
+				var table = reflect.New(baseType)
+				var holder = table.Elem()
+				db.err = scanRowsToTableValue(rows, columns, holder)
+				if db.err != nil {
+					return db
+				}
+
+				if isBasePtr {
+					holderValue.Set(reflect.Append(holderValue, table))
+				} else {
+					holderValue.Set(reflect.Append(holderValue, holder))
+				}
+			}
+
+		// scan to table struct
+		case reflect.Struct:
+			for rows.Next() {
+				db.err = scanRowsToTableValue(rows, columns, holderValue)
+				if db.err != nil {
+					return db
+				}
+			}
+
+		// scan to map
+		case reflect.Map:
+			initMap(holder)
+			m, ok := (holder).(*(map[string]interface{}))
+			if ok {
+				db.err = scanRowsToMap(rows, *m)
+			}
+
+		default:
+		}
+
+	case optionInsert, optionUpdate:
+		if db.isTxOn {
+			_, db.err = db.SqlTxDB.Exec(db.sentence.raw)
+		} else {
+			_, db.err = db.SqlDB.Exec(db.sentence.raw)
+		}
+
+		cost = time.Since(now)
+	}
+
+	if db.err != nil && dbConfig.handleError != nil {
+		dbConfig.handleError(db.err)
 	}
 
 	return db

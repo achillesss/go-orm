@@ -57,11 +57,11 @@ func (v sqlValues) String() string {
 	var values []map[string]string
 	for i := range v.columns {
 		columns = append(columns, convertToSqlColumn(v.columns[i]))
-		for i, row := range v.values {
-			if len(values)-1 < i {
+		for j, row := range v.values {
+			if len(values)-1 < j {
 				values = append(values, make(map[string]string))
 			}
-			values[i][v.columns[i]] = fmt.Sprintf("%v", row[v.columns[i]])
+			values[j][v.columns[i]] = fmt.Sprintf("%v", row[v.columns[i]])
 		}
 	}
 
@@ -134,14 +134,4 @@ func (db *DB) insert(set interface{}, args ...interface{}) *DB {
 	var d = db.copy()
 	d.sentence.insert(set, args...)
 	return d
-}
-
-func (db *DB) doInsert() *DB {
-	var query = db.sentence.String()
-	if db.isTxOn {
-		_, db.err = db.SqlTxDB.Exec(query)
-	} else {
-		_, db.err = db.SqlDB.Exec(query)
-	}
-	return db
 }

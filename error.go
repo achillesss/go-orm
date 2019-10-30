@@ -7,9 +7,10 @@ func (e ormErr) Error() string {
 }
 
 const (
-	errInvalidTable                 ormErr = "InvalidTable"
-	errInvalidScanHolder            ormErr = "InvalidScanHolder"
-	errScanHolderMustBeValidPointer ormErr = "ScanHolderMustBeValidPointer"
-	errSelectQueryNeedDataHolder    ormErr = "SelectQueryNeedDataHolder"
-	errNotSupportType               ormErr = "NotSupportType"
+	ErrInvalidTable                 ormErr = "InvalidTable"
+	ErrInvalidScanHolder            ormErr = "InvalidScanHolder"
+	ErrScanHolderMustBeValidPointer ormErr = "ScanHolderMustBeValidPointer"
+	ErrSelectQueryNeedDataHolder    ormErr = "SelectQueryNeedDataHolder"
+	ErrNotSupportType               ormErr = "NotSupportType"
+	ErrNotFound                     ormErr = "NotFound"
 )

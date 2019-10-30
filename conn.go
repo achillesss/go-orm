@@ -12,5 +12,5 @@ func (c *connConfig) Open() (*DB, error) {
 		return nil, err
 	}
 	dbConfig = *c
-	return &DB{SqlDB: db, sentence: &sqlSentence{}}, nil
+	return &DB{SqlDB: db, OriginDB: db}, nil
 }

@@ -11,7 +11,7 @@ func getValueTableName(table reflect.Value, getTableNameMethod string) (tableNam
 		return
 	}
 
-	tableName = camalToSnake(typ.Name())
+	tableName = camelToSnake(typ.Name())
 	ok = true
 
 	m, methodOK := typ.MethodByName(getTableNameMethod)
@@ -77,18 +77,22 @@ func getColumnName(valueField reflect.Value, typeField reflect.StructField) (nam
 
 	var typ = valueField.Type()
 	k := typ.Kind()
+	if k == reflect.Struct && typ.Name() != "Time" {
+		isStruct = true
+		return
+	}
+
 	if k == reflect.Ptr {
 		typ = typ.Elem()
 		k = typ.Kind()
 	}
 
-	_, ok := validColumn[k]
-	if !ok {
+	if k == reflect.Struct && typ.Name() != "Time" {
 		return
 	}
 
-	if k == reflect.Struct && typ.Name() != "Time" {
-		isStruct = true
+	_, ok := validColumn[k]
+	if !ok {
 		return
 	}
 
@@ -98,7 +102,7 @@ func getColumnName(valueField reflect.Value, typeField reflect.StructField) (nam
 	}
 
 	isColumn = true
-	name = camalToSnake(typeField.Name)
+	name = camelToSnake(typeField.Name)
 
 	n, ok := tags["column"]
 	if !ok {

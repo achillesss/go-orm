@@ -73,13 +73,3 @@ func (db *DB) update(set interface{}, args ...interface{}) *DB {
 	d.sentence.update(set, args...)
 	return d
 }
-
-func (db *DB) doUpdate() *DB {
-	var query = db.sentence.String()
-	if db.isTxOn {
-		_, db.err = db.SqlTxDB.Exec(query)
-	} else {
-		_, db.err = db.SqlDB.Exec(query)
-	}
-	return db
-}

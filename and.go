@@ -37,6 +37,7 @@ func (s *sqlSentence) and(where interface{}, args ...interface{}) {
 	if s.where == nil {
 		s.where = new(joinSquel)
 	}
+
 	var val = reflect.Indirect(reflect.ValueOf(where))
 	switch val.Kind() {
 	case reflect.String:

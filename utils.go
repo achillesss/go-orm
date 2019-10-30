@@ -13,13 +13,33 @@ import (
 
 var space = ""
 
-var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
-var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
+var upper = regexp.MustCompile("[A-Z]")
 
-func camalToSnake(camal string) string {
-	var snake = matchFirstCap.ReplaceAllString(camal, "${1}_${2}")
-	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
-	return strings.ToLower(snake)
+func camelToSnake(s string) string {
+	var a []string
+	var lastIndex int
+	var lastIsUpper bool
+	for i, r := range s {
+		var b = []byte{byte(r)}
+		var isUpper = upper.Match(b)
+		if i == 0 {
+			lastIsUpper = isUpper
+			continue
+		}
+
+		if isUpper && !lastIsUpper {
+			a = append(a, s[lastIndex:i])
+			lastIndex = i
+		}
+
+		lastIsUpper = isUpper
+
+		if i == len(s)-1 {
+			a = append(a, s[lastIndex:])
+		}
+
+	}
+	return strings.ToLower(strings.Join(a, "_"))
 }
 
 var invalidColumn = map[reflect.Kind]interface{}{
@@ -145,3 +165,5 @@ func debugLog(format string, args ...interface{}) {
 		log.Infofln(format, args...)
 	}
 }
+
+func GetNowTime() time.Time { return time.Now() }

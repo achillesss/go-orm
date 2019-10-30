@@ -84,6 +84,8 @@ type sqlSentence struct {
 	orderBy sqlOrders
 	offset  int
 	limit   int
+
+	raw string
 }
 
 func (s *sqlSentence) copy() *sqlSentence {
@@ -105,6 +107,10 @@ func offsetSquel(offset int) string {
 }
 
 func (q *sqlSentence) String() string {
+	if q.raw != "" {
+		return q.raw
+	}
+
 	var sentenceSlice []string
 	sentenceSlice = append(sentenceSlice, q.head.String())
 	sentenceSlice = append(sentenceSlice, convertToSqlColumn(q.tableName))
@@ -117,8 +123,9 @@ func (q *sqlSentence) String() string {
 			sentenceSlice = append(sentenceSlice, q.value.UpdateString())
 		}
 
-		if q.where != nil {
-			sentenceSlice = append(sentenceSlice, "WHERE", q.where.String())
+		var w = q.where.String()
+		if q.where != nil && w != "" {
+			sentenceSlice = append(sentenceSlice, "WHERE", w)
 		}
 
 	case optionInsert:
@@ -131,8 +138,9 @@ func (q *sqlSentence) String() string {
 		}
 
 	case optionSelect:
-		if q.where != nil {
-			sentenceSlice = append(sentenceSlice, "WHERE", q.where.String())
+		var w = q.where.String()
+		if q.where != nil && w != "" {
+			sentenceSlice = append(sentenceSlice, "WHERE", w)
 		}
 
 		if q.groupBy != nil {
@@ -152,7 +160,6 @@ func (q *sqlSentence) String() string {
 		}
 	}
 
-	var query = strings.Join(sentenceSlice, " ") + ";"
-	debugLog(query)
-	return query
+	q.raw = strings.Join(sentenceSlice, " ") + ";"
+	return q.raw
 }

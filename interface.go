@@ -14,6 +14,7 @@ type SqlDB interface {
 	SqlReadDB
 	SqlWriteDB
 	Begin() (*sql.Tx, error)
+	Close() error
 }
 
 type SqlTx interface {

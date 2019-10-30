@@ -21,6 +21,7 @@ type connConfig struct {
 	writeTimeout       time.Duration
 	getTableNameMethod string
 	debugOn            bool
+	handleError        func(error)
 }
 
 type ConnOption interface {
@@ -132,6 +133,12 @@ func WithDebug(debugOn bool) ConnOption {
 func WithGetTableNameMethod(method string) ConnOption {
 	return newOptionHolder(func(o *connConfig) {
 		o.getTableNameMethod = method
+	})
+}
+
+func WithHandleError(f func(error)) ConnOption {
+	return newOptionHolder(func(o *connConfig) {
+		o.handleError = f
 	})
 }
 

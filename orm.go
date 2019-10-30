@@ -1,5 +1,7 @@
 package orm
 
+import "database/sql"
+
 type DB struct {
 	SqlDB
 	SqlTxDB
@@ -9,6 +11,8 @@ type DB struct {
 	// err returns any err
 	err    error
 	isTxOn bool
+
+	OriginDB *sql.DB
 }
 
 func (db *DB) copy() *DB {
