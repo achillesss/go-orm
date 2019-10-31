@@ -5,14 +5,14 @@ import (
 	"reflect"
 )
 
+// or xx or xx or xx
 func (j *joinSquel) addOrRaw(raw string) *joinSquel {
 	j.or = append(j.or, raw)
 	return j
 }
 
-// or xx or xx or xx
-func (j *joinSquel) addOr(column string, value interface{}) *joinSquel {
-	j.or = append(j.or, joinColumnValue(column, value))
+func (j *joinSquel) addOr(column string, symbol string, values ...interface{}) *joinSquel {
+	j.or = append(j.or, joinColumnValue(column, symbol, values...))
 	return j
 }
 
@@ -21,8 +21,13 @@ func (j *joinSquel) setSubOr(s *joinSquel) *joinSquel {
 	return j
 }
 
-func (s *joinSquel) orMap(src map[string]interface{}) *joinSquel {
-	var j = newJoinSquelFromMap(src)
+func (s *joinSquel) orMap(src map[string][]interface{}, symbol string) *joinSquel {
+	for k, vs := range src {
+		for i := range vs {
+			vs[i] = convertToSqlValue(k, vs[i])
+		}
+	}
+	var j = newJoinSquelFromMap(src, symbol)
 	if j.subOr == nil {
 		s.subOr = j
 		return s
@@ -46,10 +51,26 @@ func (s *sqlSentence) or(where interface{}, args ...interface{}) {
 	switch val.Kind() {
 	case reflect.String:
 		s.where.addOrRaw(fmt.Sprintf(val.String(), args...))
+
 	case reflect.Map:
-		m, ok := val.Interface().(map[string]interface{})
-		if ok {
-			s.where.orMap(m)
+		var symbol string
+		if len(args) != 0 {
+			s, ok := args[0].(string)
+			if ok {
+				symbol = s
+			}
+		}
+
+		switch m := val.Interface().(type) {
+		case map[string]interface{}:
+			var srcMap = make(map[string][]interface{})
+			for k, v := range m {
+				srcMap[k] = append(srcMap[k], v)
+			}
+			s.where.orMap(srcMap, symbol)
+
+		case map[string][]interface{}:
+			s.where.orMap(m, symbol)
 		}
 	case reflect.Struct:
 		s.where.orTable(val)

@@ -13,33 +13,10 @@ import (
 
 var space = ""
 
-var upper = regexp.MustCompile("[A-Z]")
+var reg = regexp.MustCompile(`([^[:upper:]])([[:upper:]])`)
 
 func camelToSnake(s string) string {
-	var a []string
-	var lastIndex int
-	var lastIsUpper bool
-	for i, r := range s {
-		var b = []byte{byte(r)}
-		var isUpper = upper.Match(b)
-		if i == 0 {
-			lastIsUpper = isUpper
-			continue
-		}
-
-		if isUpper && !lastIsUpper {
-			a = append(a, s[lastIndex:i])
-			lastIndex = i
-		}
-
-		lastIsUpper = isUpper
-
-		if i == len(s)-1 {
-			a = append(a, s[lastIndex:])
-		}
-
-	}
-	return strings.ToLower(strings.Join(a, "_"))
+	return strings.ToLower(reg.ReplaceAllString(s, "${1}_${2}"))
 }
 
 var invalidColumn = map[reflect.Kind]interface{}{
@@ -94,6 +71,10 @@ func defaultSQLValue(column string) string {
 }
 
 func convertValueToSqlValue(column string, val reflect.Value, keepOriginValue bool) interface{} {
+	if !val.IsValid() {
+		return NULL
+	}
+
 	// is pointer
 	if val.Kind() == reflect.Ptr {
 		if val.IsNil() {
