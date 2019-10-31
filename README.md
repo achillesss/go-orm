@@ -68,54 +68,62 @@ if err!=nil {
 
 ## SELECT
 ```golang
-// select Jhon
+
+// select * from user where name = 'Jhon';
 var jhon User
 err = db.Select().Where(User{Name: "Jhon"}).Do(&jhon)
 if err!=nil {
     ...
 }
 
-// select 17 year old teenagers
+// select * from user where `age` = 17;
 var teenagers []*User
 err = db.Select().Where(User{Age: 17}).Do(&teenagers)
 if err!=nil {
     ...
 }
 
-// select 17 year old teenagers's `id` and `name`
-err = db.Select("id", "name").Where(User{Age: 17}).Do(&sevenTeenUsers)
+// select `id`, `name` from user where `age` = 17;
+err = db.Select("id", "name").Where(User{Age: 17}).Do(&teenagers)
 if err!=nil {
     ...
 }
+
+// select * from user where `age` > 16 and id < 100;
+err = db.Table(User{}).Select().Where(map[string]interface{}{"age": 16}, ">").And(map[string]interface{}{"id": 100}, "<").Do(&teenagers)
+if err!=nil {
+    ...
+}
+
 ```
 
 ## UPDATE
 ```golang
-// on jhon's birthday
+// update user set age = 18 where name = 'Jhon';
 err = db.Update(User{Age: 18}).Where(User{Name: "Jhon"}).Do()
 if err!=nil {
     ...
 }
 
-// he goes to sleep
+// update user set is_sleeping = true where name = 'Jhon';
 err = db.Update(map[string]interface{"is_sleeping": true}).Where(User{Name: "Jhon"}).Do()
 if err!=nil {
     ...
 }
 
-// then everyone goes to sleep
+// update user set is_sleeping = true;
 err = db.Table(User{}).Update(map[string]interface{"is_sleeping": true}).Do()
 if err!=nil {
     ...
 }
 
-// after a while, jhon wakes up
+// update user set is_sleeping = false where name = 'Jhon';
 err = db.Update(map[string]interface{"is_sleeping": false}).Where(User{Name: "Jhon"}).Do()
 if err!=nil {
     ...
 }
 
-// or jhon wakes update and find out that he's age increased
+// update user set aget = 19, is_sleeping = DEFAULT(is_sleeping) where name = 'Jhon';
 err = db.Update(&User{Age: 19}, "is_sleeping").Where(User{Name: "Jhon"}).Do()
 if err!=nil {
     ...
