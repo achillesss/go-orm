@@ -61,11 +61,11 @@ func (s sqlOrders) String() string {
 }
 
 type sqlGroup struct {
-	column []string
+	columns []string
 }
 
 func (s *sqlGroup) String() string {
-	return fmt.Sprintf("GROUP BY %s", strings.Join(convertToSqlColumns(s.column), ","))
+	return fmt.Sprintf("GROUP BY %s", strings.Join(convertToSqlColumns(s.columns), ","))
 }
 
 type sqlSentence struct {

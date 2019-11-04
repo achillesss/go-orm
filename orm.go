@@ -52,6 +52,19 @@ func (db *DB) Or(where interface{}, args ...interface{}) *DB {
 	return db.or(where, args...)
 }
 
+func (db *DB) GroupBy(columns ...string) *DB { return db.groupBy(columns...) }
+
+// OrderBy(column string, isAsc bool)
+// OrderBy(columns []string, isAsc bool)
+// OrderBy(isAscColumns map[string]bool, columns []string)
+// OrderBy(isAscColumns map[string]bool, columns ...string)
+func (db *DB) OrderBy(columns interface{}, args ...interface{}) *DB {
+	return db.orderBy(columns, args...)
+}
+
+func (db *DB) Limit(limit int) *DB   { return db.limit(limit) }
+func (db *DB) Offset(offset int) *DB { return db.offset(offset) }
+
 // Insert(&struct{})
 // Insert([]*struct{})
 // Insert(format string, args ...interface{})

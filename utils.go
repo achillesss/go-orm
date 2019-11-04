@@ -108,11 +108,10 @@ func convertToSqlValue(column string, src interface{}, keepOriginValue ...bool) 
 }
 
 func convertToSqlColumns(columns []string) []string {
-	var cs []string
-	for _, c := range columns {
-		cs = append(cs, convertToSqlColumn(c))
+	for i := range columns {
+		columns[i] = convertToSqlColumn(columns[i])
 	}
-	return cs
+	return columns
 }
 
 func convertToSqlColumn(column string) string {
