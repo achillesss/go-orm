@@ -57,7 +57,12 @@ func (s sqlOrders) String() string {
 	for _, o := range s {
 		os = append(os, o.String())
 	}
-	return strings.Join(os, ",")
+	var orders = strings.Join(os, ",")
+	if orders != "" {
+		return "ORDER BY " + orders
+	}
+
+	return ""
 }
 
 type sqlGroup struct {
