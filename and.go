@@ -38,6 +38,16 @@ func (s *joinSquel) andTable(src reflect.Value) *joinSquel {
 	return s
 }
 
+func (s *joinSquel) andDefaultColumns(columns ...string) *joinSquel {
+	for _, column := range columns {
+		if column == "" {
+			continue
+		}
+		s.addAnd(column, "", defaultSQLValue(column))
+	}
+	return s
+}
+
 func (s *sqlSentence) and(where interface{}, args ...interface{}) {
 	if s.where == nil {
 		s.where = new(joinSquel)
@@ -72,6 +82,20 @@ func (s *sqlSentence) and(where interface{}, args ...interface{}) {
 	case reflect.Struct:
 		s.where.andTable(val)
 		s.mod = where
+		for i, arg := range args {
+			switch c := arg.(type) {
+			case string:
+				s.where.andDefaultColumns(c)
+
+			case []string:
+				if i == 0 {
+					s.where.andDefaultColumns(c...)
+					break
+				}
+
+			default:
+			}
+		}
 	}
 }
 

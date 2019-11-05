@@ -42,6 +42,16 @@ func (s *joinSquel) orTable(src reflect.Value) *joinSquel {
 	return s
 }
 
+func (s *joinSquel) orDefaultColumns(columns ...string) *joinSquel {
+	for _, column := range columns {
+		if column == "" {
+			continue
+		}
+		s.addOr(column, "", defaultSQLValue(column))
+	}
+	return s
+}
+
 func (s *sqlSentence) or(where interface{}, args ...interface{}) {
 	if s.where == nil {
 		s.where = new(joinSquel)

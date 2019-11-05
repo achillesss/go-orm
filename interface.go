@@ -10,9 +10,13 @@ type SqlWriteDB interface {
 	Exec(query string, args ...interface{}) (sql.Result, error)
 }
 
-type SqlDB interface {
+type SqlBaseDB interface {
 	SqlReadDB
 	SqlWriteDB
+}
+
+type SqlDB interface {
+	SqlBaseDB
 	Begin() (*sql.Tx, error)
 	Close() error
 }
@@ -23,7 +27,6 @@ type SqlTx interface {
 }
 
 type SqlTxDB interface {
-	SqlReadDB
-	SqlWriteDB
+	SqlBaseDB
 	SqlTx
 }

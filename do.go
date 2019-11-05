@@ -128,6 +128,9 @@ func (db *DB) do(any ...interface{}) *DB {
 			}
 
 		default:
+			if any != nil {
+				db.err = scanRowsToAny(rows, any...)
+			}
 		}
 
 	case optionInsert, optionUpdate:

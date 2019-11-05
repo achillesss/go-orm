@@ -115,3 +115,13 @@ func scanRowsToMap(rows *sql.Rows, dst map[string]interface{}) error {
 
 	return err
 }
+
+func scanRowsToAny(rows *sql.Rows, any ...interface{}) error {
+	var err error = ErrNotFound
+
+	for rows.Next() {
+		err = rows.Scan(any...)
+	}
+
+	return err
+}
