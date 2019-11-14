@@ -53,18 +53,19 @@ func joinColumnValue(column string, symbol string, values ...interface{}) string
 		if symbol == "" {
 			symbol = "="
 			if strings.EqualFold(val, "NULL") {
-				symbol = " IS "
+				symbol = "IS"
 			}
 		}
 
 		return strings.Join([]string{
 			convertToSqlColumn(column),
+			symbol,
 			val,
-		}, symbol)
+		}, " ")
 	}
 
 	if symbol == "" {
-		symbol = " IN "
+		symbol = "IN"
 	}
 
 	var strValues []string
@@ -74,8 +75,9 @@ func joinColumnValue(column string, symbol string, values ...interface{}) string
 
 	return strings.Join([]string{
 		convertToSqlColumn(column),
+		symbol,
 		bracket(strings.Join(strValues, ",")),
-	}, symbol)
+	}, " ")
 }
 
 func newJoinSquel(k string, symbol string, v interface{}) *joinSquel {

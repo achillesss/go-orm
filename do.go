@@ -95,18 +95,41 @@ func (db *DB) do(any ...interface{}) *DB {
 				baseType = baseType.Elem()
 			}
 
-			for rows.Next() {
-				var table = reflect.New(baseType)
-				var holder = table.Elem()
-				db.err = scanRowsToTableValue(rows, columns, holder)
-				if db.err != nil {
-					return db
+			switch baseType.Kind() {
+			case reflect.Struct:
+				for rows.Next() {
+					var table = reflect.New(baseType)
+					var holder = table.Elem()
+					db.err = scanRowsToTableValue(rows, columns, holder)
+					if db.err != nil {
+						return db
+					}
+
+					if isBasePtr {
+						holderValue.Set(reflect.Append(holderValue, table))
+					} else {
+						holderValue.Set(reflect.Append(holderValue, holder))
+					}
 				}
 
-				if isBasePtr {
-					holderValue.Set(reflect.Append(holderValue, table))
-				} else {
-					holderValue.Set(reflect.Append(holderValue, holder))
+			// TODO
+			case reflect.Slice:
+
+			default:
+				db.err = ErrNotFound
+				for rows.Next() {
+					var column = reflect.New(baseType)
+					var holder = column.Elem()
+					db.err = rows.Scan(column.Interface())
+					if db.err != nil {
+						return db
+					}
+
+					if isBasePtr {
+						holderValue.Set(reflect.Append(holderValue, column))
+					} else {
+						holderValue.Set(reflect.Append(holderValue, holder))
+					}
 				}
 			}
 

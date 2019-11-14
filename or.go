@@ -24,7 +24,7 @@ func (j *joinSquel) setSubOr(s *joinSquel) *joinSquel {
 func (s *joinSquel) orMap(src map[string][]interface{}, symbol string) *joinSquel {
 	for k, vs := range src {
 		for i := range vs {
-			vs[i] = convertToSqlValue(k, vs[i])
+			vs[i] = convertToSqlValue(k, vs[i], true)
 		}
 	}
 	var j = newJoinSquelFromMap(src, symbol)

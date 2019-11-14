@@ -111,6 +111,10 @@ func (s *sqlSentence) insert(set interface{}, args ...interface{}) {
 	var val = reflect.Indirect(reflect.ValueOf(set))
 	switch val.Kind() {
 	case reflect.Slice:
+		if val.Len() == 0 {
+			return
+		}
+
 		var values sqlValues
 		s.values = &values
 

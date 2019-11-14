@@ -1,6 +1,9 @@
 package orm
 
-import "database/sql"
+import (
+	"database/sql"
+	"reflect"
+)
 
 type SqlReadDB interface {
 	Query(query string, args ...interface{}) (*sql.Rows, error)
@@ -29,4 +32,19 @@ type SqlTx interface {
 type SqlTxDB interface {
 	SqlBaseDB
 	SqlTx
+}
+
+// convert slice to []interface{}
+func ConvertToInterfaceSlice(src interface{}) []interface{} {
+	var val = reflect.ValueOf(src)
+	if val.Kind() != reflect.Slice {
+		return nil
+	}
+
+	var res []interface{}
+	for n := 0; n < val.Len(); n++ {
+		res = append(res, val.Index(n).Interface())
+	}
+
+	return res
 }
