@@ -163,6 +163,9 @@ func (q *sqlSentence) String() string {
 		if q.offset != 0 {
 			sentenceSlice = append(sentenceSlice, offsetSquel(q.offset))
 		}
+
+	default:
+		panic(ErrInvalidQuery)
 	}
 
 	q.raw = strings.Join(sentenceSlice, " ") + ";"

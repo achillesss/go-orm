@@ -22,12 +22,13 @@ func (j *joinSquel) setSubAnd(s *joinSquel) *joinSquel {
 }
 
 func (s *joinSquel) andMap(src map[string][]interface{}, symbol string) *joinSquel {
+	var valMap = make(map[string][]interface{})
 	for k, vs := range src {
 		for i := range vs {
-			vs[i] = convertToSqlValue(k, vs[i], true)
+			valMap[k] = append(valMap[k], convertToSqlValue(k, vs[i], true))
 		}
 	}
-	var j = newJoinSquelFromMap(src, symbol)
+	var j = newJoinSquelFromMap(valMap, symbol)
 	s.addAndRaw(j.String())
 	return s
 }

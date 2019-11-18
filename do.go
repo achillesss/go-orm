@@ -11,8 +11,7 @@ import (
 func (db *DB) do(any ...interface{}) *DB {
 	var val = reflect.Indirect(reflect.ValueOf(db.sentence.mod))
 	if val.Kind() != reflect.Struct {
-		db.err = ErrInvalidTable
-		return db
+		panic(ErrInvalidTable)
 	}
 
 	db.sentence.table(db.sentence.mod)
@@ -25,11 +24,11 @@ func (db *DB) do(any ...interface{}) *DB {
 		defer func() {
 			switch db.err {
 			case nil:
-				log.Infofln(db.sentence.raw)
+				log.InfoflnN(3, db.sentence.raw)
 			case ErrNotFound:
-				log.Warningfln("%s%s;%v", db.sentence.raw, db.err, cost)
+				log.WarningflnN(3, "%s%s;%v", db.sentence.raw, db.err, cost)
 			default:
-				log.Errorfln("%s%s;%v", db.sentence.raw, db.err, cost)
+				log.ErrorflnN(3, "%s%s;%v", db.sentence.raw, db.err, cost)
 			}
 		}()
 	}

@@ -13,4 +13,5 @@ const (
 	ErrSelectQueryNeedDataHolder    ormErr = "SelectQueryNeedDataHolder"
 	ErrNotSupportType               ormErr = "NotSupportType"
 	ErrNotFound                     ormErr = "NotFound"
+	ErrInvalidQuery                 ormErr = "InvalidQuery"
 )
