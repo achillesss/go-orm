@@ -7,6 +7,9 @@ import (
 
 // and xx and xx and xx
 func (j *joinSquel) addAndRaw(raw string) *joinSquel {
+	if raw == "" {
+		return j
+	}
 	j.and = append(j.and, raw)
 	return j
 }

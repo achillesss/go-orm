@@ -44,10 +44,10 @@ func getTableName(t interface{}, getTableNameMethod string) (tableName string, o
 
 // parse tag to map[string]string
 // tag: `gorm:"k1:v1;k2:v2"`
-func parseTag(t reflect.StructTag) map[string]string {
-	var valueString = t.Get("gorm")
-	if valueString == "" {
-		return nil
+func parseTag(t reflect.StructTag) (map[string]string, bool) {
+	valueString, ok := t.Lookup("gorm")
+	if !ok {
+		return nil, false
 	}
 
 	var valueSlice = strings.Split(valueString, ";")
@@ -64,10 +64,10 @@ func parseTag(t reflect.StructTag) map[string]string {
 	}
 
 	if len(tagKV) == 0 {
-		return nil
+		return nil, true
 	}
 
-	return tagKV
+	return tagKV, true
 }
 
 func getColumnName(valueField reflect.Value, typeField reflect.StructField) (name string, isColumn bool, isStruct bool) {
@@ -96,13 +96,17 @@ func getColumnName(valueField reflect.Value, typeField reflect.StructField) (nam
 		return
 	}
 
-	var tags = parseTag(typeField.Tag)
-	if tags == nil {
+	tags, ok := parseTag(typeField.Tag)
+	if !ok {
 		return
 	}
 
 	isColumn = true
 	name = camelToSnake(typeField.Name)
+
+	if tags == nil {
+		return
+	}
 
 	n, ok := tags["column"]
 	if !ok {
