@@ -94,6 +94,7 @@ func (s *sqlValues) insertSlice(tables ...interface{}) {
 	for _, table := range tables {
 		var val = reflect.Indirect(reflect.ValueOf(table))
 		var columnValues = make(map[string]interface{})
+		// here must be true, not false
 		var columns, values = readTable(val, true)
 		for i := range columns {
 			columnValues[columns[i]] = values[i]

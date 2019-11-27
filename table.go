@@ -134,15 +134,20 @@ func readTable(val reflect.Value, readDefaultValue bool) (columns []string, valu
 			continue
 		}
 
-		if !readDefaultValue {
-			var defaultValue = reflect.Zero(valueField.Type())
-			if reflect.DeepEqual(defaultValue.Interface(), valueField.Interface()) {
-				continue
-			}
-		}
+		switch columnName {
+		case "created_at", "updated_at":
 
-		columns = append(columns, columnName)
-		values = append(values, convertValueToSqlValue(columnName, valueField, false))
+		default:
+			if !readDefaultValue {
+				var defaultValue = reflect.Zero(valueField.Type())
+				if reflect.DeepEqual(defaultValue.Interface(), valueField.Interface()) {
+					continue
+				}
+			}
+
+			columns = append(columns, columnName)
+			values = append(values, convertValueToSqlValue(columnName, valueField, false))
+		}
 	}
 
 	return
