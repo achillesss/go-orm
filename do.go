@@ -24,7 +24,7 @@ func (db *DB) do(any ...interface{}) *DB {
 		defer func() {
 			switch db.err {
 			case nil:
-				log.InfoflnN(3, db.sentence.raw)
+				log.InfoflnN(3, "%s%v", db.sentence.raw, cost)
 			case ErrNotFound:
 				log.WarningflnN(3, "%s %s;%v", db.sentence.raw, db.err, cost)
 			default:
