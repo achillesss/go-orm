@@ -26,9 +26,9 @@ func (db *DB) do(any ...interface{}) *DB {
 			case nil:
 				log.InfoflnN(3, db.sentence.raw)
 			case ErrNotFound:
-				log.WarningflnN(3, "%s%s;%v", db.sentence.raw, db.err, cost)
+				log.WarningflnN(3, "%s %s;%v", db.sentence.raw, db.err, cost)
 			default:
-				log.ErrorflnN(3, "%s%s;%v", db.sentence.raw, db.err, cost)
+				log.ErrorflnN(3, "%s %s;%v", db.sentence.raw, db.err, cost)
 			}
 		}()
 	}
@@ -66,7 +66,9 @@ func (db *DB) do(any ...interface{}) *DB {
 
 		cost = time.Since(now)
 
-		defer rows.Close()
+		if rows != nil {
+			defer rows.Close()
+		}
 
 		if db.err != nil {
 			return db
