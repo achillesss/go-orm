@@ -15,7 +15,7 @@ func (db *DB) do(any ...interface{}) *DB {
 	}
 
 	db.sentence.table(db.sentence.mod)
-	db.sentence.String()
+	var query = db.sentence.String()
 
 	var now = GetNowTime()
 	var cost time.Duration
@@ -25,11 +25,11 @@ func (db *DB) do(any ...interface{}) *DB {
 		defer func() {
 			switch db.err {
 			case nil:
-				log.InfoflnN(3, "%s%v@%v", db.sentence.raw, cost, finishQueryAt)
+				log.InfoflnN(3, "%s%v@%v", query, cost, finishQueryAt)
 			case ErrNotFound:
-				log.WarningflnN(3, "%s %s;%v@%v", db.sentence.raw, db.err, cost, finishQueryAt)
+				log.WarningflnN(3, "%s %s;%v@%v", query, db.err, cost, finishQueryAt)
 			default:
-				log.ErrorflnN(3, "%s %s;%v@%v", db.sentence.raw, db.err, cost, finishQueryAt)
+				log.ErrorflnN(3, "%s %s;%v@%v", query, db.err, cost, finishQueryAt)
 			}
 		}()
 	}
@@ -60,9 +60,9 @@ func (db *DB) do(any ...interface{}) *DB {
 
 		var rows *sql.Rows
 		if db.isTxOn {
-			rows, db.err = db.SqlTxDB.Query(db.sentence.raw)
+			rows, db.err = db.SqlTxDB.Query(query)
 		} else {
-			rows, db.err = db.SqlDB.Query(db.sentence.raw)
+			rows, db.err = db.SqlDB.Query(query)
 		}
 
 		cost = time.Since(now)
@@ -161,9 +161,9 @@ func (db *DB) do(any ...interface{}) *DB {
 
 	case optionInsert, optionUpdate:
 		if db.isTxOn {
-			_, db.err = db.SqlTxDB.Exec(db.sentence.raw)
+			_, db.err = db.SqlTxDB.Exec(query)
 		} else {
-			_, db.err = db.SqlDB.Exec(db.sentence.raw)
+			_, db.err = db.SqlDB.Exec(query)
 		}
 
 		cost = time.Since(now)

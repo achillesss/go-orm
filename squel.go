@@ -168,6 +168,5 @@ func (q *sqlSentence) String() string {
 		panic(ErrInvalidQuery)
 	}
 
-	q.raw = strings.Join(sentenceSlice, " ") + ";"
-	return q.raw
+	return strings.Join(sentenceSlice, " ") + ";"
 }
