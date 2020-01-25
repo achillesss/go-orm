@@ -89,8 +89,6 @@ type sqlSentence struct {
 	orderBy sqlOrders
 	offset  int
 	limit   int
-
-	raw string
 }
 
 func (s *sqlSentence) copy() *sqlSentence {
@@ -164,6 +162,5 @@ func (q *sqlSentence) String() string {
 		panic(ErrInvalidQuery)
 	}
 
-	q.raw = strings.Join(sentenceSlice, " ") + ";"
-	return q.raw
+	return strings.Join(sentenceSlice, " ") + ";"
 }
