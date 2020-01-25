@@ -19,16 +19,17 @@ func (db *DB) do(any ...interface{}) *DB {
 
 	var now = GetNowTime()
 	var cost time.Duration
+	var finishQueryAt time.Time
 
 	if dbConfig.debugOn {
 		defer func() {
 			switch db.err {
 			case nil:
-				log.InfoflnN(3, "%s%v", db.sentence.raw, cost)
+				log.InfoflnN(3, "%s%v@%v", db.sentence.raw, cost, finishQueryAt)
 			case ErrNotFound:
-				log.WarningflnN(3, "%s %s;%v", db.sentence.raw, db.err, cost)
+				log.WarningflnN(3, "%s %s;%v@%v", db.sentence.raw, db.err, cost, finishQueryAt)
 			default:
-				log.ErrorflnN(3, "%s %s;%v", db.sentence.raw, db.err, cost)
+				log.ErrorflnN(3, "%s %s;%v@%v", db.sentence.raw, db.err, cost, finishQueryAt)
 			}
 		}()
 	}
@@ -65,6 +66,7 @@ func (db *DB) do(any ...interface{}) *DB {
 		}
 
 		cost = time.Since(now)
+		finishQueryAt = time.Now()
 
 		if rows != nil {
 			defer rows.Close()
@@ -165,6 +167,7 @@ func (db *DB) do(any ...interface{}) *DB {
 		}
 
 		cost = time.Since(now)
+		finishQueryAt = time.Now()
 	}
 
 	if db.err != nil && dbConfig.handleError != nil {
