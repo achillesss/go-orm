@@ -83,10 +83,13 @@ func (db *DB) do(any ...interface{}) *DB {
 		}
 
 		db.err = ErrNotFound
+		var scanSlice = holderType.Kind() == reflect.Slice
+		var scanTable = holderType.Kind() == reflect.Struct && holderType.Name() != "Time"
+		var scanMap = holderType.Kind() == reflect.Map
 
-		switch holderType.Kind() {
+		switch {
 		// scan to slice
-		case reflect.Slice:
+		case scanSlice:
 			if val.IsNil() {
 				db.err = ErrScanHolderMustBeValidPointer
 				return db
@@ -137,7 +140,7 @@ func (db *DB) do(any ...interface{}) *DB {
 			}
 
 		// scan to table struct
-		case reflect.Struct:
+		case scanTable:
 			for rows.Next() {
 				db.err = scanRowsToTableValue(rows, columns, holderValue)
 				if db.err != nil {
@@ -146,7 +149,7 @@ func (db *DB) do(any ...interface{}) *DB {
 			}
 
 		// scan to map
-		case reflect.Map:
+		case scanMap:
 			initMap(holder)
 			m, ok := (holder).(*(map[string]interface{}))
 			if ok {
