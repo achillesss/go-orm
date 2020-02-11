@@ -119,4 +119,5 @@ func (db *DB) End(ok bool) error {
 
 func (db *DB) Debug(ok bool) *DB {
 	db.debug = ok
+	return db
 }
