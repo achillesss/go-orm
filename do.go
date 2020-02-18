@@ -24,11 +24,11 @@ func (db *DB) do(any ...interface{}) *DB {
 	defer func() {
 		switch db.err {
 		case nil:
-			if dbConfig.logLevel < 1 {
+			if dbConfig.logLevel < dbConfig.infoLevel {
 				log.InfoflnN(3, "%s%v@%v", query, cost, finishQueryAt)
 			}
 		case ErrNotFound:
-			if dbConfig.logLevel < 3 {
+			if dbConfig.logLevel < dbConfig.warnLevel {
 				log.WarningflnN(3, "%s;%s;%v@%v", query, db.err, cost, finishQueryAt)
 			}
 		default:

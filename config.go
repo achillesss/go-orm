@@ -21,6 +21,8 @@ type connConfig struct {
 	writeTimeout       time.Duration
 	getTableNameMethod string
 	logLevel           int
+	warnLevel          int
+	infoLevel          int
 	handleError        func(error)
 }
 
@@ -119,10 +121,22 @@ func WithWriteTimeout(timeout time.Duration) ConnOption {
 	})
 }
 
-// time.Minute by default
+// log level
 func WithLogLevel(level int) ConnOption {
 	return newOptionHolder(func(o *connConfig) {
 		o.logLevel = level
+	})
+}
+
+func WithSetInfoLevel(level int) ConnOption {
+	return newOptionHolder(func(o *connConfig) {
+		o.infoLevel = level
+	})
+}
+
+func WithSetWarnLevel(level int) ConnOption {
+	return newOptionHolder(func(o *connConfig) {
+		o.warnLevel = level
 	})
 }
 
