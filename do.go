@@ -29,9 +29,11 @@ func (db *DB) do(any ...interface{}) *DB {
 					log.InfoflnN(3, "%s%v@%v", query, cost, finishQueryAt)
 				}
 			case ErrNotFound:
-				log.WarningflnN(3, "%s %s;%v@%v", query, db.err, cost, finishQueryAt)
+				if db.debug {
+					log.WarningflnN(3, "%s;%s;%v@%v", query, db.err, cost, finishQueryAt)
+				}
 			default:
-				log.ErrorflnN(3, "%s %s;%v@%v", query, db.err, cost, finishQueryAt)
+				log.ErrorflnN(3, "%s;%s;%v@%v", query, db.err, cost, finishQueryAt)
 			}
 		}()
 	}
