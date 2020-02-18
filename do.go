@@ -21,22 +21,20 @@ func (db *DB) do(any ...interface{}) *DB {
 	var cost time.Duration
 	var finishQueryAt time.Time
 
-	if dbConfig.debugOn {
-		defer func() {
-			switch db.err {
-			case nil:
-				if db.debug {
-					log.InfoflnN(3, "%s%v@%v", query, cost, finishQueryAt)
-				}
-			case ErrNotFound:
-				if db.debug {
-					log.WarningflnN(3, "%s;%s;%v@%v", query, db.err, cost, finishQueryAt)
-				}
-			default:
-				log.ErrorflnN(3, "%s;%s;%v@%v", query, db.err, cost, finishQueryAt)
+	defer func() {
+		switch db.err {
+		case nil:
+			if dbConfig.logLevel < 1 {
+				log.InfoflnN(3, "%s%v@%v", query, cost, finishQueryAt)
 			}
-		}()
-	}
+		case ErrNotFound:
+			if dbConfig.logLevel < 3 {
+				log.WarningflnN(3, "%s;%s;%v@%v", query, db.err, cost, finishQueryAt)
+			}
+		default:
+			log.ErrorflnN(3, "%s;%s;%v@%v", query, db.err, cost, finishQueryAt)
+		}
+	}()
 
 	switch db.sentence.head.option {
 	case optionSelect:

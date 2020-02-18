@@ -13,8 +13,6 @@ type DB struct {
 	isTxOn bool
 
 	OriginDB *sql.DB
-
-	debug bool
 }
 
 func (db *DB) copy() *DB {
