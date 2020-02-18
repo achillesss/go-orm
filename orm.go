@@ -20,7 +20,6 @@ func (db *DB) copy() *DB {
 	d.SqlDB = db.SqlDB
 	d.SqlTxDB = db.SqlTxDB
 	d.isTxOn = db.isTxOn
-	d.debug = db.debug
 
 	if db.sentence == nil {
 		d.sentence = newSentence()
@@ -113,9 +112,4 @@ func (db *DB) Rollback() error {
 func (db *DB) End(ok bool) error {
 	defer func() { db.isTxOn = false }()
 	return End(db.SqlTxDB, ok)
-}
-
-func (db *DB) Debug(ok bool) *DB {
-	db.debug = ok
-	return db
 }

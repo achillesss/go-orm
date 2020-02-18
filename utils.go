@@ -7,8 +7,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/wizhodl/go-utils/log"
 )
 
 var space = ""
@@ -139,12 +137,6 @@ func initMap(src interface{}) bool {
 		elm.Set(reflect.MakeMap(elm.Type()))
 	}
 	return true
-}
-
-func debugLog(format string, args ...interface{}) {
-	if dbConfig.debugOn {
-		log.Infofln(format, args...)
-	}
 }
 
 func GetNowTime() time.Time { return time.Now() }
