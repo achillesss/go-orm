@@ -194,3 +194,7 @@ func (c *connConfig) loginString() string {
 		c.writeTimeout,
 	)
 }
+
+func UpdateLogLevel(level int) {
+	dbConfig.logLevel = level
+}
