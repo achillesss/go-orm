@@ -1,6 +1,7 @@
 package orm
 
 import (
+	"database/sql"
 	"fmt"
 	"strings"
 )
@@ -75,7 +76,8 @@ func (s *sqlGroup) String() string {
 
 type sqlSentence struct {
 	// table
-	mod interface{}
+	mod          interface{}
+	updateIDFunc func(result sql.Result) error
 
 	head      sqlHead
 	tableName string

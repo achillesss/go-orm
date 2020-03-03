@@ -170,11 +170,26 @@ func (db *DB) do(any ...interface{}) *DB {
 			}
 		}
 
-	case optionInsert, optionUpdate:
+	case optionUpdate:
 		if db.isTxOn {
 			_, db.err = db.SqlTxDB.Exec(query)
 		} else {
 			_, db.err = db.SqlDB.Exec(query)
+		}
+
+		cost = time.Since(now)
+		finishQueryAt = time.Now()
+
+	case optionInsert:
+		var r sql.Result
+		if db.isTxOn {
+			r, db.err = db.SqlTxDB.Exec(query)
+		} else {
+			r, db.err = db.SqlDB.Exec(query)
+		}
+
+		if db.err == nil && db.sentence.updateIDFunc != nil {
+			db.err = db.sentence.updateIDFunc(r)
 		}
 
 		cost = time.Since(now)

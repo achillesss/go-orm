@@ -14,4 +14,5 @@ const (
 	ErrNotSupportType               ormErr = "NotSupportType"
 	ErrNotFound                     ormErr = "NotFound"
 	ErrInvalidQuery                 ormErr = "InvalidQuery"
+	ErrArrayElemNotPtr              ormErr = "ArrayElemNotPtr"
 )
