@@ -152,25 +152,23 @@ func (s *sqlSentence) insert(set interface{}, args ...interface{}) {
 		panic(ErrNotSupportType)
 	}
 
-	s.updateIDFunc = func(result sql.Result) error {
-		lastID, er := result.LastInsertId()
-		if er != nil {
-			return er
+	s.updateIDFunc = func(result sql.Result) {
+		lastID, _ := result.LastInsertId()
+		if lastID < 1 {
+			return
 		}
 
 		for _, t := range tables {
 			var value = reflect.ValueOf(t)
 			valT, ok := value.Type().Elem().FieldByName("ID")
 			if !ok {
-				continue
+				return
 			}
 
 			val := value.Elem().FieldByName("ID")
 			val.Set(reflect.ValueOf(lastID).Convert(valT.Type))
 			lastID++
 		}
-
-		return nil
 	}
 }
 

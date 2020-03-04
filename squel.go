@@ -77,7 +77,7 @@ func (s *sqlGroup) String() string {
 type sqlSentence struct {
 	// table
 	mod          interface{}
-	updateIDFunc func(result sql.Result) error
+	updateIDFunc func(result sql.Result)
 
 	head      sqlHead
 	tableName string

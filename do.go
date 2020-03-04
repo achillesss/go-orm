@@ -189,7 +189,7 @@ func (db *DB) do(any ...interface{}) *DB {
 		}
 
 		if db.err == nil && db.sentence.updateIDFunc != nil {
-			db.err = db.sentence.updateIDFunc(r)
+			db.sentence.updateIDFunc(r)
 		}
 
 		cost = time.Since(now)
