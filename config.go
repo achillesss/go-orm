@@ -117,7 +117,7 @@ func WithReadTimeout(timeout time.Duration) ConnOption {
 // time.Minute by default
 func WithWriteTimeout(timeout time.Duration) ConnOption {
 	return newOptionHolder(func(o *connConfig) {
-		o.readTimeout = timeout
+		o.writeTimeout = timeout
 	})
 }
 
