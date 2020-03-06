@@ -12,7 +12,7 @@ import (
 func (db *DB) do(any ...interface{}) *DB {
 	var val = reflect.Indirect(reflect.ValueOf(db.sentence.mod))
 	if val.Kind() != reflect.Struct {
-		panic(fmt.Sprintf("%s:%s\n", ErrInvalidTable, val.Interface()))
+		panic(fmt.Sprintf("%s:%s\n", ErrInvalidTable, val.Kind()))
 	}
 
 	db.sentence.table(db.sentence.mod)
