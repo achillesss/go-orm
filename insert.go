@@ -110,7 +110,7 @@ func (s *sqlValues) insertSlice(tables ...interface{}) {
 
 func (s *sqlSentence) insert(set interface{}, args ...interface{}) {
 	s.head.insert()
-	var val = reflect.Indirect(reflect.ValueOf(set))
+	var val = reflect.ValueOf(set)
 	var tables []interface{}
 
 	switch val.Kind() {
