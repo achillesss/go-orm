@@ -2,6 +2,7 @@ package orm
 
 import (
 	"database/sql"
+	"fmt"
 	"reflect"
 	"time"
 
@@ -11,7 +12,7 @@ import (
 func (db *DB) do(any ...interface{}) *DB {
 	var val = reflect.Indirect(reflect.ValueOf(db.sentence.mod))
 	if val.Kind() != reflect.Struct {
-		panic(ErrInvalidTable)
+		panic(fmt.Sprintf("%s:%s\n", ErrInvalidTable, val.Interface()))
 	}
 
 	db.sentence.table(db.sentence.mod)

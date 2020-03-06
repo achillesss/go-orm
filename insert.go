@@ -110,7 +110,7 @@ func (s *sqlValues) insertSlice(tables ...interface{}) {
 
 func (s *sqlSentence) insert(set interface{}, args ...interface{}) {
 	s.head.insert()
-	var val = reflect.ValueOf(set)
+	var val = reflect.Indirect(reflect.ValueOf(set))
 	var tables []interface{}
 
 	switch val.Kind() {
@@ -145,11 +145,11 @@ func (s *sqlSentence) insert(set interface{}, args ...interface{}) {
 		// case reflect.Slice:
 
 		default:
-			panic(ErrNotSupportType)
+			panic(fmt.Sprintf("%s:%v\n", ErrNotSupportType, val.Elem().Kind()))
 		}
 
 	default:
-		panic(ErrNotSupportType)
+		panic(fmt.Sprintf("%s:%v\n", ErrNotSupportType, val.Kind()))
 	}
 
 	s.updateIDFunc = func(result sql.Result) {
