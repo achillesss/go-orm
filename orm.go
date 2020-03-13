@@ -113,3 +113,7 @@ func (db *DB) End(ok bool) error {
 	defer func() { db.isTxOn = false }()
 	return End(db.SqlTxDB, ok)
 }
+
+func (db *DB) Close() error {
+	return db.OriginDB.Close()
+}
