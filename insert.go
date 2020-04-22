@@ -1,6 +1,7 @@
 package orm
 
 import (
+	"database/sql"
 	"fmt"
 	"reflect"
 	"strings"
@@ -109,29 +110,65 @@ func (s *sqlValues) insertSlice(tables ...interface{}) {
 
 func (s *sqlSentence) insert(set interface{}, args ...interface{}) {
 	s.head.insert()
-	var val = reflect.Indirect(reflect.ValueOf(set))
+	var val = reflect.ValueOf(set)
+	var tables []interface{}
+
 	switch val.Kind() {
 	case reflect.Slice:
 		if val.Len() == 0 {
 			return
 		}
 
+		if val.Type().Elem().Kind() != reflect.Ptr {
+			panic(ErrArrayElemNotPtr)
+		}
+
 		var values sqlValues
 		s.values = &values
 
-		var tables []interface{}
 		for i := 0; i < val.Len(); i++ {
 			tables = append(tables, val.Index(i).Interface())
 		}
+
 		values.insertSlice(tables...)
 		s.mod = tables[0]
 
-	case reflect.Struct:
-		s.mod = set
-		var value sqlValue
-		s.value = &value
-		value.insertSingle(set)
+	case reflect.Ptr:
+		switch val.Elem().Kind() {
+		case reflect.Struct:
+			s.mod = set
+			tables = []interface{}{set}
+			var value sqlValue
+			s.value = &value
+			value.insertSingle(set)
 
+		// case reflect.Slice:
+
+		default:
+			panic(fmt.Sprintf("%s:%v\n", ErrNotSupportType, val.Elem().Kind()))
+		}
+
+	default:
+		panic(fmt.Sprintf("%s:%v\n", ErrNotSupportType, val.Kind()))
+	}
+
+	s.updateIDFunc = func(result sql.Result) {
+		lastID, _ := result.LastInsertId()
+		if lastID < 1 {
+			return
+		}
+
+		for _, t := range tables {
+			var value = reflect.ValueOf(t)
+			valT, ok := value.Type().Elem().FieldByName("ID")
+			if !ok {
+				return
+			}
+
+			val := value.Elem().FieldByName("ID")
+			val.Set(reflect.ValueOf(lastID).Convert(valT.Type))
+			lastID++
+		}
 	}
 }
 

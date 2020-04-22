@@ -2,6 +2,7 @@ package orm
 
 import (
 	"database/sql"
+	"fmt"
 	"reflect"
 	"time"
 
@@ -11,7 +12,7 @@ import (
 func (db *DB) do(any ...interface{}) *DB {
 	var val = reflect.Indirect(reflect.ValueOf(db.sentence.mod))
 	if val.Kind() != reflect.Struct {
-		panic(ErrInvalidTable)
+		panic(fmt.Sprintf("%s:%s\n", ErrInvalidTable, val.Kind()))
 	}
 
 	db.sentence.table(db.sentence.mod)
@@ -21,18 +22,26 @@ func (db *DB) do(any ...interface{}) *DB {
 	var cost time.Duration
 	var finishQueryAt time.Time
 
-	if dbConfig.debugOn {
-		defer func() {
-			switch db.err {
-			case nil:
-				log.InfoflnN(3, "%s%v@%v", query, cost, finishQueryAt)
-			case ErrNotFound:
-				log.WarningflnN(3, "%s %s;%v@%v", query, db.err, cost, finishQueryAt)
-			default:
-				log.ErrorflnN(3, "%s %s;%v@%v", query, db.err, cost, finishQueryAt)
+	defer func() {
+		switch db.err {
+		case nil:
+			if dbConfig.logLevel > dbConfig.infoLevel {
+				return
 			}
-		}()
-	}
+
+			log.InfoflnN(3, "%s%v@%v", query, cost, finishQueryAt)
+
+		case ErrNotFound:
+			if dbConfig.logLevel > dbConfig.warnLevel {
+				return
+			}
+
+			log.WarningflnN(3, "%s;%s;%v@%v", query, db.err, cost, finishQueryAt)
+
+		default:
+			log.ErrorflnN(3, "%s;%s;%v@%v", query, db.err, cost, finishQueryAt)
+		}
+	}()
 
 	switch db.sentence.head.option {
 	case optionSelect:
@@ -83,10 +92,13 @@ func (db *DB) do(any ...interface{}) *DB {
 		}
 
 		db.err = ErrNotFound
+		var scanSlice = holderType.Kind() == reflect.Slice
+		var scanTable = holderType.Kind() == reflect.Struct && holderType.Name() != "Time"
+		var scanMap = holderType.Kind() == reflect.Map
 
-		switch holderType.Kind() {
+		switch {
 		// scan to slice
-		case reflect.Slice:
+		case scanSlice:
 			if val.IsNil() {
 				db.err = ErrScanHolderMustBeValidPointer
 				return db
@@ -137,7 +149,7 @@ func (db *DB) do(any ...interface{}) *DB {
 			}
 
 		// scan to table struct
-		case reflect.Struct:
+		case scanTable:
 			for rows.Next() {
 				db.err = scanRowsToTableValue(rows, columns, holderValue)
 				if db.err != nil {
@@ -146,7 +158,7 @@ func (db *DB) do(any ...interface{}) *DB {
 			}
 
 		// scan to map
-		case reflect.Map:
+		case scanMap:
 			initMap(holder)
 			m, ok := (holder).(*(map[string]interface{}))
 			if ok {
@@ -159,11 +171,26 @@ func (db *DB) do(any ...interface{}) *DB {
 			}
 		}
 
-	case optionInsert, optionUpdate:
+	case optionUpdate:
 		if db.isTxOn {
 			_, db.err = db.SqlTxDB.Exec(query)
 		} else {
 			_, db.err = db.SqlDB.Exec(query)
+		}
+
+		cost = time.Since(now)
+		finishQueryAt = time.Now()
+
+	case optionInsert:
+		var r sql.Result
+		if db.isTxOn {
+			r, db.err = db.SqlTxDB.Exec(query)
+		} else {
+			r, db.err = db.SqlDB.Exec(query)
+		}
+
+		if db.err == nil && db.sentence.updateIDFunc != nil {
+			db.sentence.updateIDFunc(r)
 		}
 
 		cost = time.Since(now)

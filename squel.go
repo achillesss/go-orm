@@ -1,6 +1,7 @@
 package orm
 
 import (
+	"database/sql"
 	"fmt"
 	"strings"
 )
@@ -75,7 +76,8 @@ func (s *sqlGroup) String() string {
 
 type sqlSentence struct {
 	// table
-	mod interface{}
+	mod          interface{}
+	updateIDFunc func(result sql.Result)
 
 	head      sqlHead
 	tableName string
@@ -89,8 +91,6 @@ type sqlSentence struct {
 	orderBy sqlOrders
 	offset  int
 	limit   int
-
-	raw string
 }
 
 func (s *sqlSentence) copy() *sqlSentence {
@@ -112,10 +112,6 @@ func offsetSquel(offset int) string {
 }
 
 func (q *sqlSentence) String() string {
-	if q.raw != "" {
-		return q.raw
-	}
-
 	var sentenceSlice []string
 	sentenceSlice = append(sentenceSlice, q.head.String())
 	sentenceSlice = append(sentenceSlice, convertToSqlColumn(q.tableName))

@@ -20,7 +20,9 @@ type connConfig struct {
 	readTimeout        time.Duration
 	writeTimeout       time.Duration
 	getTableNameMethod string
-	debugOn            bool
+	logLevel           int
+	warnLevel          int
+	infoLevel          int
 	handleError        func(error)
 }
 
@@ -115,14 +117,26 @@ func WithReadTimeout(timeout time.Duration) ConnOption {
 // time.Minute by default
 func WithWriteTimeout(timeout time.Duration) ConnOption {
 	return newOptionHolder(func(o *connConfig) {
-		o.readTimeout = timeout
+		o.writeTimeout = timeout
 	})
 }
 
-// time.Minute by default
-func WithDebug(debugOn bool) ConnOption {
+// log level
+func WithLogLevel(level int) ConnOption {
 	return newOptionHolder(func(o *connConfig) {
-		o.debugOn = debugOn
+		o.logLevel = level
+	})
+}
+
+func WithSetInfoLevel(level int) ConnOption {
+	return newOptionHolder(func(o *connConfig) {
+		o.infoLevel = level
+	})
+}
+
+func WithSetWarnLevel(level int) ConnOption {
+	return newOptionHolder(func(o *connConfig) {
+		o.warnLevel = level
 	})
 }
 
@@ -179,4 +193,8 @@ func (c *connConfig) loginString() string {
 		c.readTimeout,
 		c.writeTimeout,
 	)
+}
+
+func UpdateLogLevel(level int) {
+	dbConfig.logLevel = level
 }
