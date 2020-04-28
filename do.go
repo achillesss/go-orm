@@ -152,9 +152,7 @@ func (db *DB) do(any ...interface{}) *DB {
 		case scanTable:
 			for rows.Next() {
 				db.err = scanRowsToTableValue(rows, columns, holderValue)
-				if db.err != nil {
-					return db
-				}
+				return db
 			}
 
 		// scan to map
