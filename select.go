@@ -86,7 +86,11 @@ func scanRowsToTableValue(rows *sql.Rows, columns []string, table reflect.Value)
 	var receivers = tableReceivers(table)
 	var holders []interface{}
 	for _, column := range columns {
-		holders = append(holders, receivers[column])
+		var holder = receivers[column]
+		if holder == nil {
+			holder = new(sql.RawBytes)
+		}
+		holders = append(holders, holder)
 	}
 	return rows.Scan(holders...)
 }
