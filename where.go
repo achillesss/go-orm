@@ -48,6 +48,8 @@ func joinColumnValue(column string, symbol string, values ...interface{}) string
 		return ""
 	}
 
+	symbol = strings.ToUpper(symbol)
+
 	if len(values) == 1 {
 		var val = fmt.Sprintf("%v", values[0])
 		if symbol == "" {
@@ -61,6 +63,16 @@ func joinColumnValue(column string, symbol string, values ...interface{}) string
 			convertToSqlColumn(column),
 			symbol,
 			val,
+		}, " ")
+	}
+
+	if symbol == "BETWEEN" && len(values) == 2 {
+		return strings.Join([]string{
+			convertToSqlColumn(column),
+			"BETWEEN",
+			fmt.Sprintf("%v", values[0]),
+			"AND",
+			fmt.Sprintf("%v", values[1]),
 		}, " ")
 	}
 
