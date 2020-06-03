@@ -80,6 +80,10 @@ func (db *DB) Update(set interface{}, args ...interface{}) *DB {
 	return db.update(set, args...)
 }
 
+func (db *DB) Delete() *DB {
+	return db.delete_()
+}
+
 func (db *DB) Raw(format string, args ...interface{}) *DB {
 	return db.raw(format, args...)
 }

@@ -11,6 +11,7 @@ const (
 	optionSelect
 	optionInsert
 	optionUpdate
+	optionDelete
 	optionRaw
 )
 
@@ -33,6 +34,9 @@ func (h *sqlHead) String() string {
 
 	case optionUpdate:
 		return "UPDATE"
+
+	case optionDelete:
+		return "DELETE FROM"
 
 	default:
 	}
@@ -161,6 +165,12 @@ func (q *sqlSentence) String() string {
 
 		if q.offset != 0 {
 			sentenceSlice = append(sentenceSlice, offsetSquel(q.offset))
+		}
+
+	case optionDelete:
+		var w = q.where.String()
+		if q.where != nil && w != "" {
+			sentenceSlice = append(sentenceSlice, "WHERE", w)
 		}
 
 	case optionRaw:

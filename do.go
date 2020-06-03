@@ -47,7 +47,7 @@ func (db *DB) do(any ...interface{}) *DB {
 	}()
 
 	switch op {
-	case optionInsert, optionUpdate, optionRaw:
+	case optionInsert, optionUpdate, optionDelete, optionRaw:
 
 		var r sql.Result
 		if db.isTxOn {
