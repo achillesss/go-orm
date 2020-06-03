@@ -11,6 +11,7 @@ const (
 	optionSelect
 	optionInsert
 	optionUpdate
+	optionRaw
 )
 
 type sqlHead struct {
@@ -34,8 +35,9 @@ func (h *sqlHead) String() string {
 		return "UPDATE"
 
 	default:
-		return ""
 	}
+
+	return ""
 }
 
 type sqlOrder struct {
@@ -91,6 +93,7 @@ type sqlSentence struct {
 	orderBy sqlOrders
 	offset  int
 	limit   int
+	raw     string
 }
 
 func (s *sqlSentence) copy() *sqlSentence {
@@ -159,6 +162,9 @@ func (q *sqlSentence) String() string {
 		if q.offset != 0 {
 			sentenceSlice = append(sentenceSlice, offsetSquel(q.offset))
 		}
+
+	case optionRaw:
+		return q.raw + ";"
 
 	default:
 		panic(ErrInvalidQuery)

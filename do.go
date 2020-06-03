@@ -10,12 +10,15 @@ import (
 )
 
 func (db *DB) do(any ...interface{}) *DB {
+	var op = db.sentence.head.option
 	var val = reflect.Indirect(reflect.ValueOf(db.sentence.mod))
-	if val.Kind() != reflect.Struct {
-		panic(fmt.Sprintf("%s:%s\n", ErrInvalidTable, val.Kind()))
+	if op != optionRaw {
+		if val.Kind() != reflect.Struct {
+			panic(fmt.Sprintf("%s:%s\n", ErrInvalidTable, val.Kind()))
+		}
+		db.sentence.table(db.sentence.mod)
 	}
 
-	db.sentence.table(db.sentence.mod)
 	var query = db.sentence.String()
 
 	var now = GetNowTime()
@@ -43,7 +46,23 @@ func (db *DB) do(any ...interface{}) *DB {
 		}
 	}()
 
-	switch db.sentence.head.option {
+	switch op {
+	case optionInsert, optionUpdate, optionRaw:
+
+		var r sql.Result
+		if db.isTxOn {
+			r, db.err = db.SqlTxDB.Exec(query)
+		} else {
+			r, db.err = db.SqlDB.Exec(query)
+		}
+
+		if op == optionInsert && db.err == nil && db.sentence.updateIDFunc != nil {
+			db.sentence.updateIDFunc(r)
+		}
+
+		cost = time.Since(now)
+		finishQueryAt = time.Now()
+
 	case optionSelect:
 		if any == nil {
 			db.err = ErrSelectQueryNeedDataHolder
@@ -168,31 +187,6 @@ func (db *DB) do(any ...interface{}) *DB {
 				db.err = scanRowsToAny(rows, any...)
 			}
 		}
-
-	case optionUpdate:
-		if db.isTxOn {
-			_, db.err = db.SqlTxDB.Exec(query)
-		} else {
-			_, db.err = db.SqlDB.Exec(query)
-		}
-
-		cost = time.Since(now)
-		finishQueryAt = time.Now()
-
-	case optionInsert:
-		var r sql.Result
-		if db.isTxOn {
-			r, db.err = db.SqlTxDB.Exec(query)
-		} else {
-			r, db.err = db.SqlDB.Exec(query)
-		}
-
-		if db.err == nil && db.sentence.updateIDFunc != nil {
-			db.sentence.updateIDFunc(r)
-		}
-
-		cost = time.Since(now)
-		finishQueryAt = time.Now()
 	}
 
 	if db.err != nil && dbConfig.handleError != nil {

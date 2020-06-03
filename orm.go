@@ -80,6 +80,10 @@ func (db *DB) Update(set interface{}, args ...interface{}) *DB {
 	return db.update(set, args...)
 }
 
+func (db *DB) Raw(format string, args ...interface{}) *DB {
+	return db.raw(format, args...)
+}
+
 // Do a sql query
 func (db *DB) Do(any ...interface{}) error {
 	return db.do(any...).err
