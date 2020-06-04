@@ -24,7 +24,7 @@ func (s *sqlSentence) updateMap(m map[string]interface{}) {
 
 func (s *sqlValue) updateTable(table interface{}, defaultColumns ...interface{}) {
 	var val = reflect.Indirect(reflect.ValueOf(table))
-	s.columns, s.values = readTable(val, false)
+	s.columns, s.values = readTable(val, true)
 	for _, c := range defaultColumns {
 		column, ok := c.(string)
 		if !ok {
