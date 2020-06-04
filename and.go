@@ -10,11 +10,16 @@ func (j *joinSquel) addAndRaw(raw string) *joinSquel {
 	if raw == "" {
 		return j
 	}
+
 	j.and = append(j.and, raw)
 	return j
 }
 
 func (j *joinSquel) addAnd(column string, symbol string, values ...interface{}) *joinSquel {
+	if values == nil {
+		return j
+	}
+
 	j.and = append(j.and, joinColumnValue(column, symbol, values...))
 	return j
 }
