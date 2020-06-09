@@ -15,6 +15,10 @@ type joinSquel struct {
 }
 
 func (j *joinSquel) String() string {
+	if j == nil {
+		return ""
+	}
+
 	if j.and == nil {
 		return ""
 	}
