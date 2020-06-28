@@ -1,5 +1,7 @@
 package orm
 
+import "github.com/wizhodl/go-utils/log"
+
 // begin transaction
 func (db *DB) begin() *DB {
 	var d = db.copy()
@@ -10,7 +12,12 @@ func (db *DB) begin() *DB {
 
 func End(tx SqlTx, ok bool) error {
 	if ok {
-		return tx.Commit()
+		if err := tx.Commit(); err != nil {
+			if dbConfig.sentryCaptureMessageFunc != nil {
+				dbConfig.sentryCaptureMessageFunc(fmt.Sprintf("CommitFailed: %v", err))
+			}
+			return tx.Rollback()
+		}
 	}
 
 	return tx.Rollback()
