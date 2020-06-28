@@ -1,6 +1,6 @@
 package orm
 
-import "github.com/wizhodl/go-utils/log"
+import "fmt"
 
 // begin transaction
 func (db *DB) begin() *DB {
