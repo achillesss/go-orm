@@ -8,23 +8,23 @@ import (
 var dbConfig connConfig
 
 type connConfig struct {
-	driverName               string
-	user                     string
-	password                 string
-	address                  string
-	db                       string
-	charSet                  string
-	parseTime                bool
-	loc                      string
-	timeout                  time.Duration
-	readTimeout              time.Duration
-	writeTimeout             time.Duration
-	getTableNameMethod       string
-	logLevel                 int
-	warnLevel                int
-	infoLevel                int
-	handleError              func(error)
-	sentryCaptureMessageFunc func(string)
+	driverName         string
+	user               string
+	password           string
+	address            string
+	db                 string
+	charSet            string
+	parseTime          bool
+	loc                string
+	timeout            time.Duration
+	readTimeout        time.Duration
+	writeTimeout       time.Duration
+	getTableNameMethod string
+	logLevel           int
+	warnLevel          int
+	infoLevel          int
+	handleError        func(error)
+	handleCommitError  func(error)
 }
 
 type ConnOption interface {
@@ -157,9 +157,9 @@ func WithHandleError(f func(error)) ConnOption {
 	})
 }
 
-func WithSentryFunc(f func(string)) ConnOption {
+func WithHandleCommitError(f func(error)) ConnOption {
 	return newOptionHolder(func(o *connConfig) {
-		o.sentryCaptureMessageFunc = f
+		o.handleCommitError = f
 	})
 }
 

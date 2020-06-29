@@ -11,13 +11,17 @@ func (db *DB) begin() *DB {
 }
 
 func End(tx SqlTx, ok bool) error {
-	if ok {
-		if err := tx.Commit(); err != nil {
-			if dbConfig.sentryCaptureMessageFunc != nil {
-				dbConfig.sentryCaptureMessageFunc(fmt.Sprintf("CommitFailed: %v", err))
-			}
-			return tx.Rollback()
-		}
+	if !ok {
+		return tx.Rollback()
+	}
+
+	var err = tx.Commit()
+	if err == nil {
+		return nil
+	}
+
+	if dbConfig.handleCommitError != nil {
+		dbConfig.handleCommitError(fmt.Errorf("CommitFailed: %v", err))
 	}
 
 	return tx.Rollback()
