@@ -25,6 +25,7 @@ type connConfig struct {
 	infoLevel          int
 	handleError        func(error)
 	handleCommitError  func(error)
+	queryIDFunc        func() string
 }
 
 type ConnOption interface {
@@ -151,15 +152,23 @@ func WithGetTableNameMethod(method string) ConnOption {
 	})
 }
 
+// handle sq exec error
 func WithHandleError(f func(error)) ConnOption {
 	return newOptionHolder(func(o *connConfig) {
 		o.handleError = f
 	})
 }
 
+// handle commit error
 func WithHandleCommitError(f func(error)) ConnOption {
 	return newOptionHolder(func(o *connConfig) {
 		o.handleCommitError = f
+	})
+}
+
+func WithQueryIDFunc(f func() string) ConnOption {
+	return newOptionHolder(func(o *connConfig) {
+		o.queryIDFunc = f
 	})
 }
 

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/wizhodl/go-utils/log"
@@ -20,6 +21,11 @@ func (db *DB) do(any ...interface{}) *DB {
 	}
 
 	var query = db.sentence.String()
+	var printQuery = query
+	if dbConfig.queryIDFunc != nil {
+		var queryID = dbConfig.queryIDFunc()
+		printQuery = strings.Join([]string{queryID, printQuery}, "||")
+	}
 
 	var now = GetNowTime()
 	var cost time.Duration
@@ -32,19 +38,23 @@ func (db *DB) do(any ...interface{}) *DB {
 				return
 			}
 
-			log.InfoflnN(3, "%s%v@%v", query, cost, finishQueryAt)
+			log.InfoflnN(3, "%sCOST %v AT %v", printQuery, cost, finishQueryAt)
 
 		case ErrNotFound:
 			if dbConfig.logLevel > dbConfig.warnLevel {
 				return
 			}
 
-			log.WarningflnN(3, "%s;%s;%v@%v", query, db.err, cost, finishQueryAt)
+			log.WarningflnN(3, "%s%s;COST %v AT %v", printQuery, db.err, cost, finishQueryAt)
 
 		default:
-			log.ErrorflnN(3, "%s;%s;%v@%v", query, db.err, cost, finishQueryAt)
+			log.ErrorflnN(3, "%s%s;COST %v AT %v", printQuery, db.err, cost, finishQueryAt)
 		}
 	}()
+
+	if dbConfig.logLevel <= dbConfig.infoLevel {
+		log.InfoflnN(2, "%s START AT %v", printQuery, now)
+	}
 
 	switch op {
 	case optionInsert, optionUpdate, optionDelete, optionRaw:
