@@ -21,39 +21,59 @@ func (db *DB) do(any ...interface{}) *DB {
 	}
 
 	var query = db.sentence.String()
-	var printQuery = query
+
+	var startPrint = []string{"SQL START"}
+	var endPrint = []string{"SQL E N D"}
+
+	var queryID string
 	if dbConfig.queryIDFunc != nil {
-		var queryID = dbConfig.queryIDFunc()
-		printQuery = strings.Join([]string{queryID, printQuery}, "||")
+		queryID = dbConfig.queryIDFunc()
 	}
 
 	var now = GetNowTime()
+	startPrint = append(startPrint, now.Format(time.StampMilli))
+	startPrint = append(startPrint, queryID)
+	startPrint = append(startPrint, query)
+
 	var cost time.Duration
 	var finishQueryAt time.Time
 
 	defer func() {
+		endPrint = append(endPrint, finishQueryAt.Format(time.StampMilli))
+		if queryID != "" {
+			endPrint = append(endPrint, queryID)
+		}
+		endPrint = append(endPrint, query)
+		endPrint = append(endPrint, cost.String())
+
+		if db.err != nil {
+			endPrint = append(endPrint, db.err.Error())
+		}
+
 		switch db.err {
 		case nil:
 			if dbConfig.logLevel > dbConfig.infoLevel {
 				return
 			}
 
-			log.InfoflnN(3, "%sCOST %v AT %v", printQuery, cost, finishQueryAt)
+			log.InfoflnN(3, strings.Join(endPrint, "|"))
 
 		case ErrNotFound:
 			if dbConfig.logLevel > dbConfig.warnLevel {
 				return
 			}
+			endPrint = append(endPrint, finishQueryAt.Format(time.StampMilli))
 
-			log.WarningflnN(3, "%s%s;COST %v AT %v", printQuery, db.err, cost, finishQueryAt)
+			log.WarningflnN(3, strings.Join(endPrint, "|"))
 
 		default:
-			log.ErrorflnN(3, "%s%s;COST %v AT %v", printQuery, db.err, cost, finishQueryAt)
+			endPrint = append(endPrint, finishQueryAt.Format(time.StampMilli))
+			log.ErrorflnN(3, strings.Join(endPrint, "|"))
 		}
 	}()
 
 	if dbConfig.logLevel <= dbConfig.infoLevel {
-		log.InfoflnN(2, "%s START AT %v", printQuery, now)
+		log.InfoflnN(2, strings.Join(startPrint, "|"))
 	}
 
 	switch op {
