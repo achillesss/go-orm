@@ -55,19 +55,15 @@ func (db *DB) do(any ...interface{}) *DB {
 			if dbConfig.logLevel > dbConfig.infoLevel {
 				return
 			}
-
 			log.InfoflnN(3, strings.Join(endPrint, "|"))
 
 		case ErrNotFound:
 			if dbConfig.logLevel > dbConfig.warnLevel {
 				return
 			}
-			endPrint = append(endPrint, finishQueryAt.Format(time.StampMilli))
-
 			log.WarningflnN(3, strings.Join(endPrint, "|"))
 
 		default:
-			endPrint = append(endPrint, finishQueryAt.Format(time.StampMilli))
 			log.ErrorflnN(3, strings.Join(endPrint, "|"))
 		}
 	}()
