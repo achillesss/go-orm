@@ -1,6 +1,10 @@
 package orm
 
-import "database/sql"
+import (
+	"database/sql"
+
+	"github.com/wizhodl/go-utils/log"
+)
 
 type DB struct {
 	SqlDB
@@ -11,6 +15,7 @@ type DB struct {
 	// err returns any err
 	err    error
 	isTxOn bool
+	txUUID string
 
 	OriginDB *sql.DB
 }
@@ -119,7 +124,12 @@ func (db *DB) Rollback() error {
 // end transaction
 func (db *DB) End(ok bool) error {
 	defer func() { db.isTxOn = false }()
-	return End(db.SqlTxDB, ok)
+	if dbConfig.logLevel <= dbConfig.infoLevel {
+		if db.txUUID != "" {
+			log.Infofln("SQL TX END|%s|%t", db.txUUID, ok)
+		}
+	}
+	return end(db.SqlTxDB, ok)
 }
 
 func (db *DB) Close() error {

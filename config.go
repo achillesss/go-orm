@@ -26,6 +26,7 @@ type connConfig struct {
 	handleError        func(error)
 	handleCommitError  func(error)
 	queryIDFunc        func() string
+	txUUIDFunc         func() string
 	dbStatsInterval    time.Duration
 }
 
@@ -176,6 +177,12 @@ func WithQueryIDFunc(f func() string) ConnOption {
 func WithDBStats(t time.Duration) ConnOption {
 	return newOptionHolder(func(o *connConfig) {
 		o.dbStatsInterval = t
+	})
+}
+
+func WithTXUUIDFunc(f func() string) ConnOption {
+	return newOptionHolder(func(o *connConfig) {
+		o.txUUIDFunc = f
 	})
 }
 
