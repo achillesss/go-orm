@@ -16,9 +16,11 @@ func (c *connConfig) Open() (*DB, error) {
 	dbConfig = *c
 	if dbConfig.dbStatsInterval > 0 {
 		var ticker = time.NewTicker(dbConfig.dbStatsInterval)
-		for range ticker.C {
-			log.Infofln("DB STATS: %+#v", db.Stats())
-		}
+		go func() {
+			for range ticker.C {
+				log.Infofln("DB STATS: %+#v", db.Stats())
+			}
+		}()
 	}
 	return &DB{SqlDB: db, OriginDB: db}, nil
 }
