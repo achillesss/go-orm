@@ -18,7 +18,9 @@ func (c *connConfig) Open() (*DB, error) {
 		var ticker = time.NewTicker(dbConfig.dbStatsInterval)
 		go func() {
 			for range ticker.C {
-				log.Infofln("DB STATS: %+#v", db.Stats())
+				if dbConfig.logLevel <= dbConfig.infoLevel {
+					log.Infofln("DB STATS: %+#v", db.Stats())
+				}
 			}
 		}()
 	}
