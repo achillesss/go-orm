@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/achillesss/log"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/wizhodl/go-utils/log"
 )
 
 func (c *connConfig) Open() (*DB, error) {
