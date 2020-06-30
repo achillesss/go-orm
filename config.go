@@ -26,6 +26,7 @@ type connConfig struct {
 	handleError        func(error)
 	handleCommitError  func(error)
 	queryIDFunc        func() string
+	dbStatsInterval    time.Duration
 }
 
 type ConnOption interface {
@@ -169,6 +170,12 @@ func WithHandleCommitError(f func(error)) ConnOption {
 func WithQueryIDFunc(f func() string) ConnOption {
 	return newOptionHolder(func(o *connConfig) {
 		o.queryIDFunc = f
+	})
+}
+
+func WithDBStats(t time.Duration) ConnOption {
+	return newOptionHolder(func(o *connConfig) {
+		o.dbStatsInterval = t
 	})
 }
 
