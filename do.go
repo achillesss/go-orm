@@ -23,7 +23,7 @@ func (db *DB) do(any ...interface{}) *DB {
 	var query = db.sentence.String()
 
 	var startPrint = []string{"SQL START"}
-	var endPrint = []string{"SQL E N D"}
+	var endPrint = []string{"SQL END"}
 
 	var queryID string
 	if dbConfig.queryIDFunc != nil {
