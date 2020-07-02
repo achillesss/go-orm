@@ -13,10 +13,10 @@ func (db *DB) begin() *DB {
 	d.isTxOn = db.err == nil
 	if dbConfig.beginTxMonitor != nil {
 		go func() {
-			db.txUUID = uuid.New().String()
+			d.txUUID = uuid.New().String()
 			var now = GetNowTime()
 			beginTxChan <- &BeginTx{
-				ID:      db.txUUID,
+				ID:      d.txUUID,
 				BeginAt: now,
 			}
 		}()
