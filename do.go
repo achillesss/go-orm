@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"reflect"
+	"sync/atomic"
 	"time"
 
 	"github.com/google/uuid"
@@ -29,7 +30,7 @@ func (db *DB) do(any ...interface{}) *DB {
 		queryID = uuid.New().String()
 	}
 
-	*db.StartCount++
+	atomic.AddInt64(db.StartCount, 1)
 	if dbConfig.startQueryMonitor != nil {
 		go func() {
 			startQueryChan <- &StartQuery{
@@ -45,7 +46,7 @@ func (db *DB) do(any ...interface{}) *DB {
 	var finishQueryAt time.Time
 
 	defer func() {
-		*db.EndCount++
+		atomic.AddInt64(db.EndCount, 1)
 		if dbConfig.endQueryMonitor == nil {
 			return
 		}
