@@ -23,7 +23,7 @@ func (db *DB) do(any ...interface{}) *DB {
 	var query = db.sentence.String()
 	var now = GetNowTime()
 	var queryID string
-	var caller = log.FuncNameN(2)
+	var caller = log.CallerLine(2)
 
 	if dbConfig.startQueryMonitor != nil || dbConfig.endQueryMonitor != nil {
 		queryID = uuid.New().String()
