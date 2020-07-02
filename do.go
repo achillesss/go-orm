@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"fmt"
 	"reflect"
-	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/wizhodl/go-utils/log"
 )
 
@@ -21,56 +21,43 @@ func (db *DB) do(any ...interface{}) *DB {
 	}
 
 	var query = db.sentence.String()
-
-	var startPrint = []string{"SQL START"}
-	var endPrint = []string{"SQL END"}
-
+	var now = GetNowTime()
 	var queryID string
-	if dbConfig.queryIDFunc != nil {
-		queryID = dbConfig.queryIDFunc()
+	var caller = log.FuncNameN(2)
+
+	if dbConfig.startQueryMonitor != nil || dbConfig.endQueryMonitor != nil {
+		queryID = uuid.New().String()
 	}
 
-	var now = GetNowTime()
-	startPrint = append(startPrint, now.Format(time.StampMilli))
-	startPrint = append(startPrint, queryID)
-	startPrint = append(startPrint, query)
+	if dbConfig.startQueryMonitor != nil {
+		go func() {
+			startQueryChan <- &StartQuery{
+				ID:      queryID,
+				Query:   query,
+				StartAt: now,
+				Caller:  caller,
+			}
+		}()
+	}
 
 	var cost time.Duration
 	var finishQueryAt time.Time
 
 	defer func() {
-		endPrint = append(endPrint, finishQueryAt.Format(time.StampMilli))
-		if queryID != "" {
-			endPrint = append(endPrint, queryID)
+		if dbConfig.endQueryMonitor == nil {
+			return
 		}
-		endPrint = append(endPrint, query)
-		endPrint = append(endPrint, cost.String())
-
-		if db.err != nil {
-			endPrint = append(endPrint, db.err.Error())
-		}
-
-		switch db.err {
-		case nil:
-			if dbConfig.logLevel > dbConfig.infoLevel {
-				return
+		go func() {
+			endQueryChan <- &EndQuery{
+				ID:     queryID,
+				Query:  query,
+				EndAt:  finishQueryAt,
+				Cost:   cost,
+				Error:  db.err,
+				Caller: caller,
 			}
-			log.InfoflnN(3, strings.Join(endPrint, "|"))
-
-		case ErrNotFound:
-			if dbConfig.logLevel > dbConfig.warnLevel {
-				return
-			}
-			log.WarningflnN(3, strings.Join(endPrint, "|"))
-
-		default:
-			log.ErrorflnN(3, strings.Join(endPrint, "|"))
-		}
+		}()
 	}()
-
-	if dbConfig.logLevel <= dbConfig.infoLevel {
-		log.InfoflnN(2, strings.Join(startPrint, "|"))
-	}
 
 	switch op {
 	case optionInsert, optionUpdate, optionDelete, optionRaw:

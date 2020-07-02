@@ -3,7 +3,7 @@ package orm
 import (
 	"fmt"
 
-	"github.com/wizhodl/go-utils/log"
+	"github.com/google/uuid"
 )
 
 // begin transaction
@@ -11,11 +11,15 @@ func (db *DB) begin() *DB {
 	var d = db.copy()
 	d.SqlTxDB, d.err = d.SqlDB.Begin()
 	d.isTxOn = db.err == nil
-	if dbConfig.txUUIDFunc != nil {
-		d.txUUID = dbConfig.txUUIDFunc()
-		if dbConfig.logLevel <= dbConfig.infoLevel {
-			log.InfoflnN(2, "SQL TX START|%s", d.txUUID)
-		}
+	if dbConfig.beginTxMonitor != nil {
+		go func() {
+			db.txUUID = uuid.New().String()
+			var now = GetNowTime()
+			beginTxChan <- &BeginTx{
+				ID:      db.txUUID,
+				BeginAt: now,
+			}
+		}()
 	}
 	return d
 }

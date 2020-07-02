@@ -2,9 +2,13 @@ package orm
 
 import (
 	"database/sql"
-
-	"github.com/wizhodl/go-utils/log"
 )
+
+type DBStats struct {
+	sql.DBStats
+	StartCount int64
+	EndCount   int64
+}
 
 type DB struct {
 	SqlDB
@@ -17,7 +21,9 @@ type DB struct {
 	isTxOn bool
 	txUUID string
 
-	OriginDB *sql.DB
+	OriginDB   *sql.DB
+	StartCount *int64
+	EndCount   *int64
 }
 
 func (db *DB) copy() *DB {
@@ -25,6 +31,8 @@ func (db *DB) copy() *DB {
 	d.SqlDB = db.SqlDB
 	d.SqlTxDB = db.SqlTxDB
 	d.isTxOn = db.isTxOn
+	d.StartCount = db.StartCount
+	d.EndCount = db.EndCount
 
 	if db.sentence == nil {
 		d.sentence = newSentence()
@@ -124,12 +132,18 @@ func (db *DB) Rollback() error {
 // end transaction
 func (db *DB) End(ok bool) error {
 	defer func() { db.isTxOn = false }()
-	if dbConfig.logLevel <= dbConfig.infoLevel {
-		if db.txUUID != "" {
-			log.Infofln("SQL TX END|%s|%t", db.txUUID, ok)
-		}
+	var err = end(db.SqlTxDB, ok)
+	if dbConfig.endTxMonitor != nil {
+		go func() {
+			endTxChan <- &EndTx{
+				ID:       db.txUUID,
+				EndAt:    GetNowTime(),
+				Error:    err,
+				IsCommit: ok,
+			}
+		}()
 	}
-	return end(db.SqlTxDB, ok)
+	return err
 }
 
 func (db *DB) Close() error {

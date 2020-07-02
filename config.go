@@ -27,7 +27,12 @@ type connConfig struct {
 	handleCommitError  func(error)
 	queryIDFunc        func() string
 	txUUIDFunc         func() string
-	dbStatsInterval    time.Duration
+
+	dbStatsMonitor    func(func() DBStats)
+	startQueryMonitor func(<-chan *StartQuery)
+	endQueryMonitor   func(<-chan *EndQuery)
+	beginTxMonitor    func(<-chan *BeginTx)
+	endTxMonitor      func(<-chan *EndTx)
 }
 
 type ConnOption interface {
@@ -168,21 +173,61 @@ func WithHandleCommitError(f func(error)) ConnOption {
 	})
 }
 
-func WithQueryIDFunc(f func() string) ConnOption {
+func WithDBStatsMonitor(f func(func() DBStats)) ConnOption {
 	return newOptionHolder(func(o *connConfig) {
-		o.queryIDFunc = f
+		o.dbStatsMonitor = f
 	})
 }
 
-func WithDBStats(t time.Duration) ConnOption {
+type StartQuery struct {
+	ID      string
+	Query   string
+	StartAt time.Time
+	Caller  string
+}
+
+func WithStartQueryMonitor(f func(startQueries <-chan *StartQuery)) ConnOption {
 	return newOptionHolder(func(o *connConfig) {
-		o.dbStatsInterval = t
+		o.startQueryMonitor = f
 	})
 }
 
-func WithTXUUIDFunc(f func() string) ConnOption {
+type EndQuery struct {
+	ID     string
+	Query  string
+	EndAt  time.Time
+	Cost   time.Duration
+	Error  error
+	Caller string
+}
+
+func WithEndQueryMonitor(f func(endQueries <-chan *EndQuery)) ConnOption {
 	return newOptionHolder(func(o *connConfig) {
-		o.txUUIDFunc = f
+		o.endQueryMonitor = f
+	})
+}
+
+type BeginTx struct {
+	ID      string
+	BeginAt time.Time
+}
+
+func WithBeginTxMonitor(f func(beginTx <-chan *BeginTx)) ConnOption {
+	return newOptionHolder(func(o *connConfig) {
+		o.beginTxMonitor = f
+	})
+}
+
+type EndTx struct {
+	ID       string
+	EndAt    time.Time
+	Error    error
+	IsCommit bool // true: commit; false: rollback
+}
+
+func WithEndTxMonitor(f func(endTx <-chan *EndTx)) ConnOption {
+	return newOptionHolder(func(o *connConfig) {
+		o.endTxMonitor = f
 	})
 }
 

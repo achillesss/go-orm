@@ -2,11 +2,14 @@ package orm
 
 import (
 	"database/sql"
-	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/wizhodl/go-utils/log"
 )
+
+var startQueryChan chan *StartQuery
+var endQueryChan chan *EndQuery
+var beginTxChan chan *BeginTx
+var endTxChan chan *EndTx
 
 func (c *connConfig) Open() (*DB, error) {
 	db, err := sql.Open(c.driverName, c.loginString())
@@ -14,13 +17,44 @@ func (c *connConfig) Open() (*DB, error) {
 		return nil, err
 	}
 	dbConfig = *c
-	if dbConfig.dbStatsInterval > 0 {
-		var ticker = time.NewTicker(dbConfig.dbStatsInterval)
-		go func() {
-			for range ticker.C {
-				log.Infofln("DB STATS: %+#v", db.Stats())
-			}
-		}()
+
+	var ormDB DB
+	ormDB.OriginDB = db
+	ormDB.SqlDB = db
+	ormDB.StartCount = new(int64)
+	ormDB.EndCount = new(int64)
+
+	if dbConfig.dbStatsMonitor != nil {
+		var getDBStatsFunc = func() DBStats {
+			var stats DBStats
+			stats.DBStats = db.Stats()
+			stats.StartCount = *ormDB.StartCount
+			stats.EndCount = *ormDB.EndCount
+			return stats
+		}
+
+		go dbConfig.dbStatsMonitor(getDBStatsFunc)
 	}
-	return &DB{SqlDB: db, OriginDB: db}, nil
+
+	if dbConfig.startQueryMonitor != nil {
+		startQueryChan = make(chan *StartQuery)
+		go dbConfig.startQueryMonitor(startQueryChan)
+	}
+
+	if dbConfig.endQueryMonitor != nil {
+		endQueryChan = make(chan *EndQuery)
+		go dbConfig.endQueryMonitor(endQueryChan)
+	}
+
+	if dbConfig.beginTxMonitor != nil {
+		beginTxChan = make(chan *BeginTx)
+		go dbConfig.beginTxMonitor(beginTxChan)
+	}
+
+	if dbConfig.endTxMonitor != nil {
+		endTxChan = make(chan *EndTx)
+		go dbConfig.endTxMonitor(endTxChan)
+	}
+
+	return &ormDB, nil
 }
