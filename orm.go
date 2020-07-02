@@ -136,9 +136,9 @@ func (db *DB) Rollback() error {
 func (db *DB) End(ok bool) error {
 	defer func() { db.isTxOn = false }()
 	var err = end(db.SqlTxDB, ok)
+	var caller = log.CallerLine(1)
 	if dbConfig.endTxMonitor != nil {
 		go func() {
-			var caller = log.CallerLine(2)
 			endTxChan <- &EndTx{
 				ID:       db.txUUID,
 				EndAt:    GetNowTime(),
