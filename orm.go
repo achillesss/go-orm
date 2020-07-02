@@ -2,6 +2,8 @@ package orm
 
 import (
 	"database/sql"
+
+	"github.com/wizhodl/go-utils/log"
 )
 
 type DBStats struct {
@@ -17,9 +19,10 @@ type DB struct {
 	// sentence gen sql sentence
 	sentence *sqlSentence
 	// err returns any err
-	err    error
-	isTxOn bool
-	txUUID string
+	err      error
+	isTxOn   bool
+	txCaller string
+	txUUID   string
 
 	OriginDB   *sql.DB
 	StartCount *int64
@@ -135,11 +138,13 @@ func (db *DB) End(ok bool) error {
 	var err = end(db.SqlTxDB, ok)
 	if dbConfig.endTxMonitor != nil {
 		go func() {
+			var caller = log.CallerLine(2)
 			endTxChan <- &EndTx{
 				ID:       db.txUUID,
 				EndAt:    GetNowTime(),
 				Error:    err,
 				IsCommit: ok,
+				Caller:   caller,
 			}
 		}()
 	}

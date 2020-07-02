@@ -210,6 +210,7 @@ func WithEndQueryMonitor(f func(endQueries <-chan *EndQuery)) ConnOption {
 type BeginTx struct {
 	ID      string
 	BeginAt time.Time
+	Caller  string
 }
 
 func WithBeginTxMonitor(f func(beginTx <-chan *BeginTx)) ConnOption {
@@ -223,6 +224,7 @@ type EndTx struct {
 	EndAt    time.Time
 	Error    error
 	IsCommit bool // true: commit; false: rollback
+	Caller   string
 }
 
 func WithEndTxMonitor(f func(endTx <-chan *EndTx)) ConnOption {
