@@ -29,6 +29,7 @@ func (db *DB) do(any ...interface{}) *DB {
 		queryID = uuid.New().String()
 	}
 
+	*db.StartCount++
 	if dbConfig.startQueryMonitor != nil {
 		go func() {
 			startQueryChan <- &StartQuery{
@@ -44,6 +45,7 @@ func (db *DB) do(any ...interface{}) *DB {
 	var finishQueryAt time.Time
 
 	defer func() {
+		*db.EndCount++
 		if dbConfig.endQueryMonitor == nil {
 			return
 		}
