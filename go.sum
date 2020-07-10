@@ -1,2 +1,6 @@
-github.com/wizhodl/go-utils v0.0.0-20200710083028-e62286ddd8d4 h1:PyMcZhoFUEu2C9UA12shEGZU852O/clNkppJr3cde2M=
-github.com/wizhodl/go-utils v0.0.0-20200710083028-e62286ddd8d4/go.mod h1:cDcDsytATzZmoN1QElsKyCQjJk96EHENl1GMID3PRA0=
+github.com/go-sql-driver/mysql v1.5.0 h1:ozyZYNQW3x3HtqT1jira07DN2PArx2v7/mN66gGcHOs=
+github.com/go-sql-driver/mysql v1.5.0/go.mod h1:DCzpHaOWr8IXmIStZouvnhqoel9Qv2LBy8hT2VhHyBg=
+github.com/google/uuid v1.1.1 h1:Gkbcsh/GbpXz7lPftLA3P6TYMwjCLYm83jiFQZF/3gY=
+github.com/google/uuid v1.1.1/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/wizhodl/go-utils v0.0.0-20200710094915-5dfda38762ce h1:ArF4Yks0Fgti9r6pifnFKgwyCV+hrO/ddhkBJYTQiXk=
+github.com/wizhodl/go-utils v0.0.0-20200710094915-5dfda38762ce/go.mod h1:cDcDsytATzZmoN1QElsKyCQjJk96EHENl1GMID3PRA0=

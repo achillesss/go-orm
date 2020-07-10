@@ -2,6 +2,7 @@ package orm
 
 import (
 	"fmt"
+	"github.com/wizhodl/go-utils/stack"
 	"time"
 )
 
@@ -234,6 +235,12 @@ type EndTx struct {
 func WithEndTxMonitor(f func(endTx <-chan *EndTx)) ConnOption {
 	return newOptionHolder(func(o *connConfig) {
 		o.endTxMonitor = f
+	})
+}
+
+func WithStackFunc(store func([]byte) string, query func(string) []byte) ConnOption {
+	return newOptionHolder(func(o *connConfig) {
+		stack.SetStackFunc(store, query)
 	})
 }
 
