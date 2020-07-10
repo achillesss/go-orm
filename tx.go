@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/wizhodl/go-utils/log"
+	"github.com/wizhodl/go-utils/stack"
 )
 
 // begin transaction
@@ -17,10 +18,12 @@ func (db *DB) begin() *DB {
 		go func() {
 			d.txUUID = uuid.New().String()
 			var now = GetNowTime()
+			var stackKey = stack.GetStackHash()
 			beginTxChan <- &BeginTx{
-				ID:      d.txUUID,
-				BeginAt: now,
-				Caller:  d.txCaller,
+				ID:       d.txUUID,
+				BeginAt:  now,
+				Caller:   d.txCaller,
+				StackKey: stackKey,
 			}
 		}()
 	}

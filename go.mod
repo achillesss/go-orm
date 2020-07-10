@@ -1,5 +1,5 @@
 module github.com/wizhodl/orm
 
-go 1.12
+go 1.14
 
-require github.com/wizhodl/go-utils v0.0.0-20191118035031-f05f5bb748de // indirect
+require github.com/wizhodl/go-utils v0.0.0-20200710083028-e62286ddd8d4 // indirect

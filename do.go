@@ -9,8 +9,10 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/wizhodl/go-utils/log"
+	"github.com/wizhodl/go-utils/stack"
 )
 
+// any[0] can be callback function which like func()
 func (db *DB) do(any ...interface{}) *DB {
 	var op = db.sentence.head.option
 	var val = reflect.Indirect(reflect.ValueOf(db.sentence.mod))
@@ -25,6 +27,7 @@ func (db *DB) do(any ...interface{}) *DB {
 	var now = GetNowTime()
 	var queryID string
 	var caller = log.CallerLine(2)
+	var stackKey = stack.GetStackHash()
 
 	if dbConfig.startQueryMonitor != nil || dbConfig.endQueryMonitor != nil {
 		queryID = uuid.New().String()
@@ -34,10 +37,11 @@ func (db *DB) do(any ...interface{}) *DB {
 	if dbConfig.startQueryMonitor != nil {
 		go func() {
 			startQueryChan <- &StartQuery{
-				ID:      queryID,
-				Query:   query,
-				StartAt: now,
-				Caller:  caller,
+				ID:       queryID,
+				Query:    query,
+				StartAt:  now,
+				Caller:   caller,
+				StackKey: stackKey,
 			}
 		}()
 	}
@@ -52,15 +56,30 @@ func (db *DB) do(any ...interface{}) *DB {
 		}
 		go func() {
 			endQueryChan <- &EndQuery{
-				ID:     queryID,
-				Query:  query,
-				EndAt:  finishQueryAt,
-				Cost:   cost,
-				Error:  db.err,
-				Caller: caller,
+				ID:       queryID,
+				Query:    query,
+				EndAt:    finishQueryAt,
+				Cost:     cost,
+				Error:    db.err,
+				Caller:   caller,
+				StackKey: stackKey,
 			}
 		}()
 	}()
+
+	if len(any) > 0 {
+		var callback = reflect.ValueOf(any[0])
+		if callback.Type().Kind() == reflect.Func {
+			defer func() {
+				go callback.Call(nil)
+			}()
+			if len(any) == 1 {
+				any = nil
+			} else {
+				any = any[1:]
+			}
+		}
+	}
 
 	switch op {
 	case optionInsert, optionUpdate, optionDelete, optionRaw:

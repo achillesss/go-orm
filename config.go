@@ -180,10 +180,11 @@ func WithDBStatsMonitor(f func(func() DBStats)) ConnOption {
 }
 
 type StartQuery struct {
-	ID      string
-	Query   string
-	StartAt time.Time
-	Caller  string
+	ID       string
+	Query    string
+	StartAt  time.Time
+	Caller   string
+	StackKey string
 }
 
 func WithStartQueryMonitor(f func(startQueries <-chan *StartQuery)) ConnOption {
@@ -193,12 +194,13 @@ func WithStartQueryMonitor(f func(startQueries <-chan *StartQuery)) ConnOption {
 }
 
 type EndQuery struct {
-	ID     string
-	Query  string
-	EndAt  time.Time
-	Cost   time.Duration
-	Error  error
-	Caller string
+	ID       string
+	Query    string
+	EndAt    time.Time
+	Cost     time.Duration
+	Error    error
+	Caller   string
+	StackKey string
 }
 
 func WithEndQueryMonitor(f func(endQueries <-chan *EndQuery)) ConnOption {
@@ -208,9 +210,10 @@ func WithEndQueryMonitor(f func(endQueries <-chan *EndQuery)) ConnOption {
 }
 
 type BeginTx struct {
-	ID      string
-	BeginAt time.Time
-	Caller  string
+	ID       string
+	BeginAt  time.Time
+	Caller   string
+	StackKey string
 }
 
 func WithBeginTxMonitor(f func(beginTx <-chan *BeginTx)) ConnOption {
@@ -225,6 +228,7 @@ type EndTx struct {
 	Error    error
 	IsCommit bool // true: commit; false: rollback
 	Caller   string
+	StackKey string
 }
 
 func WithEndTxMonitor(f func(endTx <-chan *EndTx)) ConnOption {

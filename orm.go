@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/wizhodl/go-utils/log"
+	"github.com/wizhodl/go-utils/stack"
 )
 
 type DBStats struct {
@@ -139,12 +140,14 @@ func (db *DB) End(ok bool) error {
 	var caller = log.CallerLine(1)
 	if dbConfig.endTxMonitor != nil {
 		go func() {
+			var stackKey = stack.GetStackHash()
 			endTxChan <- &EndTx{
 				ID:       db.txUUID,
 				EndAt:    GetNowTime(),
 				Error:    err,
 				IsCommit: ok,
 				Caller:   caller,
+				StackKey: stackKey,
 			}
 		}()
 	}
