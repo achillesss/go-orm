@@ -14,3 +14,7 @@ github.com/wizhodl/go-utils v0.0.0-20200713034331-64aab5320937 h1:ENOYJd+K0UCU7/
 github.com/wizhodl/go-utils v0.0.0-20200713034331-64aab5320937/go.mod h1:IibEJmy8IuGSprfb5htoug7CbBE5rCEoZl5fFZPXLMY=
 github.com/wizhodl/go-utils v0.0.0-20200713072721-518e012631c7 h1:taZmFP9EIKk04QEfGC3orNjEXPUdfn3Fa8iMyjT2HHE=
 github.com/wizhodl/go-utils v0.0.0-20200713072721-518e012631c7/go.mod h1:IibEJmy8IuGSprfb5htoug7CbBE5rCEoZl5fFZPXLMY=
+github.com/wizhodl/go-utils v0.0.0-20200713073913-50036dfe3d25 h1:sXz+xnkYjil3VOD+z5O2rc8g+/yW8A/ROtJEPDcG35k=
+github.com/wizhodl/go-utils v0.0.0-20200713073913-50036dfe3d25/go.mod h1:IibEJmy8IuGSprfb5htoug7CbBE5rCEoZl5fFZPXLMY=
+github.com/wizhodl/go-utils v0.0.0-20200713080956-d6c7375e25bf h1:tZAgH4QG/UEt/QRBvUYVZ7/pR6ielk5MFLLpimy2gLM=
+github.com/wizhodl/go-utils v0.0.0-20200713080956-d6c7375e25bf/go.mod h1:IibEJmy8IuGSprfb5htoug7CbBE5rCEoZl5fFZPXLMY=
