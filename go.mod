@@ -5,5 +5,5 @@ go 1.12
 require (
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/google/uuid v1.1.1
-	github.com/wizhodl/go-utils v0.0.0-20200713023630-f7b75f3b73ac
+	github.com/wizhodl/go-utils v0.0.0-20200713025658-6850bb6fb96f
 )
