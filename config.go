@@ -238,7 +238,7 @@ func WithEndTxMonitor(f func(endTx <-chan *EndTx)) ConnOption {
 	})
 }
 
-func WithStackFunc(store func([]byte) string, query func(string) (int64, []byte)) ConnOption {
+func WithStackFunc(store func([]byte) (string, bool), query func(string) (int64, []byte)) ConnOption {
 	return newOptionHolder(func(o *connConfig) {
 		stack.SetStackFunc(store, query)
 	})
