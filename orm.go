@@ -138,9 +138,9 @@ func (db *DB) End(ok bool) error {
 	defer func() { db.isTxOn = false }()
 	var err = end(db.SqlTxDB, ok)
 	var caller = log.CallerLine(1)
+	var stackKey = stack.GetStackHash()
 	if dbConfig.endTxMonitor != nil {
 		go func() {
-			var stackKey = stack.GetStackHash()
 			endTxChan <- &EndTx{
 				ID:       db.txUUID,
 				EndAt:    GetNowTime(),

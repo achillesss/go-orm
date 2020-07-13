@@ -14,11 +14,11 @@ func (db *DB) begin() *DB {
 	d.SqlTxDB, d.err = d.SqlDB.Begin()
 	d.isTxOn = db.err == nil
 	d.txCaller = log.CallerLine(2)
+	var stackKey = stack.GetStackHash()
 	if dbConfig.beginTxMonitor != nil {
 		go func() {
 			d.txUUID = uuid.New().String()
 			var now = GetNowTime()
-			var stackKey = stack.GetStackHash()
 			beginTxChan <- &BeginTx{
 				ID:       d.txUUID,
 				BeginAt:  now,
