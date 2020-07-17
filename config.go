@@ -2,27 +2,26 @@ package orm
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
 var dbConfig connConfig
 
 type connConfig struct {
-	driverName         string
-	user               string
-	password           string
-	address            string
-	db                 string
-	charSet            string
-	parseTime          bool
-	loc                string
-	timeout            time.Duration
-	readTimeout        time.Duration
-	writeTimeout       time.Duration
+	driverName   string
+	user         string
+	password     string
+	address      string
+	db           string
+	charSet      string
+	parseTime    bool
+	loc          string
+	timeout      time.Duration
+	readTimeout  time.Duration
+	writeTimeout time.Duration
+
 	getTableNameMethod string
-	logLevel           int
-	warnLevel          int
-	infoLevel          int
 	handleError        func(error)
 	handleCommitError  func(error)
 	queryIDFunc        func() string
@@ -127,25 +126,6 @@ func WithReadTimeout(timeout time.Duration) ConnOption {
 func WithWriteTimeout(timeout time.Duration) ConnOption {
 	return newOptionHolder(func(o *connConfig) {
 		o.writeTimeout = timeout
-	})
-}
-
-// log level
-func WithLogLevel(level int) ConnOption {
-	return newOptionHolder(func(o *connConfig) {
-		o.logLevel = level
-	})
-}
-
-func WithSetInfoLevel(level int) ConnOption {
-	return newOptionHolder(func(o *connConfig) {
-		o.infoLevel = level
-	})
-}
-
-func WithSetWarnLevel(level int) ConnOption {
-	return newOptionHolder(func(o *connConfig) {
-		o.warnLevel = level
 	})
 }
 
@@ -260,22 +240,42 @@ func NewConnConfig(options ...ConnOption) *connConfig {
 }
 
 func (c *connConfig) loginString() string {
-	var format = "%s:%s@tcp(%s)/%s?charset=%s&parseTime=%t&loc=%s&timeout=%s&readTimeout=%s&writeTimeout=%s"
-	return fmt.Sprintf(
-		format,
-		c.user,
-		c.password,
-		c.address,
-		c.db,
-		c.charSet,
-		c.parseTime,
-		c.loc,
-		c.timeout,
-		c.readTimeout,
-		c.writeTimeout,
-	)
-}
+	// "%s:%s@tcp(%s)/%s?charset=%s&parseTime=%t&loc=%s&timeout=%s&readTimeout=%s&writeTimeout=%s"
+	var baseStr = fmt.Sprintf("%s:%s@tcp(%s)/%s", c.user, c.password, c.address, c.db)
+	var kv = make(map[string]string)
+	if c.charSet != "" {
+		kv["charset"] = c.charSet
+	}
 
-func UpdateLogLevel(level int) {
-	dbConfig.logLevel = level
+	if c.parseTime {
+		kv["parseTime"] = "true"
+	}
+
+	if c.loc != "" {
+		kv["loc"] = c.loc
+	}
+
+	if c.timeout != 0 {
+		kv["timeout"] = c.timeout.String()
+	}
+
+	if c.readTimeout != 0 {
+		kv["readTimeout"] = c.readTimeout.String()
+	}
+
+	if c.writeTimeout != 0 {
+		kv["writeTimeout"] = c.writeTimeout.String()
+	}
+
+	var path []string
+	for k, v := range kv {
+		path = append(path, k+"="+v)
+	}
+
+	var pathQuery = strings.Join(path, "&")
+	if pathQuery == "" {
+		return baseStr
+	}
+
+	return baseStr + "?" + pathQuery
 }
