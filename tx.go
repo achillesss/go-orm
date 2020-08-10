@@ -12,7 +12,7 @@ import (
 func (db *DB) begin() *DB {
 	var d = db.copy()
 	d.SqlTxDB, d.err = d.SqlDB.Begin()
-	d.isTxOn = db.err == nil
+	d.isTxOn = d.err == nil
 	d.txCaller = log.CallerLine(2)
 	var stackKey = stack.GetStackHash()
 	if dbConfig.beginTxMonitor != nil {
