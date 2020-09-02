@@ -140,3 +140,18 @@ func initMap(src interface{}) bool {
 }
 
 func GetNowTime() time.Time { return time.Now() }
+
+// convert slice to []interface{}
+func ConvertToInterfaceSlice(src interface{}) []interface{} {
+	var val = reflect.ValueOf(src)
+	if val.Kind() != reflect.Slice {
+		return nil
+	}
+
+	var res []interface{}
+	for n := 0; n < val.Len(); n++ {
+		res = append(res, val.Index(n).Interface())
+	}
+
+	return res
+}
