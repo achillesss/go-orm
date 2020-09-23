@@ -3,8 +3,8 @@ package orm
 import (
 	"database/sql"
 
-	"github.com/wizhodl/go-utils/log"
-	"github.com/wizhodl/go-utils/stack"
+	"github.com/achillesss/go-utils/log"
+	"github.com/achillesss/go-utils/stack"
 )
 
 type DBStats struct {

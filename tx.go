@@ -3,9 +3,9 @@ package orm
 import (
 	"fmt"
 
+	"github.com/achillesss/go-utils/log"
+	"github.com/achillesss/go-utils/stack"
 	"github.com/google/uuid"
-	"github.com/wizhodl/go-utils/log"
-	"github.com/wizhodl/go-utils/stack"
 )
 
 // begin transaction
